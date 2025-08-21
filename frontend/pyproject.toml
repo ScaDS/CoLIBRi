@@ -1,0 +1,151 @@
+# Guide (user-friendly):
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+
+[build-system]
+# Choosing a build backend:
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/#choosing-a-build-backend
+# A list of packages that are needed to build the project package:
+requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+# The name of the Python object that frontends will use to perform the build:
+build-backend = "setuptools.build_meta"
+
+[project]
+# This is the name of the project. The first time you publish this
+# package, this name will be registered for you. Restrictions:
+# https://packaging.python.org/specifications/core-metadata/#name
+name = "info-extract-app"
+
+# Versions should comply with PEP 440
+version = "0.0.1"
+
+# This is a one-line description of what the project does:
+# https://packaging.python.org/specifications/core-metadata/#summary
+description = "Microservice for the central web-application"
+
+# This is an optional longer description of the project.
+# Often, the same as the README, corresponds to:
+# https://packaging.python.org/specifications/core-metadata/#description-optional
+#readme = "README.md"
+
+# Specify which Python versions are supported. 'pip install' will check this
+# and refuse to install the project if the version does not match:
+# https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
+requires-python = ">=3.11"
+
+# This is either text indicating the license for distribution, or a license file.
+# https://packaging.python.org/en/latest/specifications/core-metadata/#license
+#license = {file = "LICENSE.txt"}
+
+# Names of the persons or organization who originally authored the project.
+authors = [
+  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
+  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
+  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+  {name = "Julian Mosig von Aehrenfeld", email = "gr15iped@studserv.uni-leipzig.de" }
+]
+
+# Names of the persons or organization who currently maintain the project.
+maintainers = [
+  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
+  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
+  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+]
+
+# Other packages that the project depends on to run.
+# Any package you put here will be installed by pip when your project is
+# installed, so they must be valid existing projects. See:
+# https://packaging.python.org/discussions/install-requires-vs-requirements/
+#dependencies = [ "some-dependency" ]
+
+[project.optional-dependencies]
+# Additional groups of dependencies (e.g. development dependencies). 
+# Users will be able to install these using the "extras" syntax, for example:
+#
+#   $ pip install sampleproject[dev]
+#
+# Optional or "extra" dependencies the project provides. See:
+# https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras
+#dev = ["check-manifest"]
+#test = ["coverage"]
+
+# Configurations for the tools used in project
+[tool.ruff]
+# See https://docs.astral.sh/ruff/settings/#top-level for details
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+line-length = 120
+indent-width = 4
+# Target Python version
+target-version = "py311"
+# Enumerate all fixed violations.
+show-fixes = true
+# Group violations by containing file.
+output-format = "grouped"
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/settings/#lint for details
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = []
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+# Do not try to fix flake8-bugbear violations, i.e., likely bugs and design problems in code
+unfixable = ["B"]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# See https://docs.astral.sh/ruff/settings/#format for details
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+# Enable auto-formatting of code examples in docstrings.
+docstring-code-format = true
+# Set the line length limit used when formatting code snippets in docstrings.
+docstring-code-line-length = "dynamic"
+
+[tool.bandit.assert_used]
+skips = ['*_test.py', '*/test_*.py']

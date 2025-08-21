@@ -1,0 +1,2 @@
+paddlepaddle-gpu==3.0.0b1
+-f https://www.paddlepaddle.org.cn/packages/stable/cu118/paddlepaddle-gpu/

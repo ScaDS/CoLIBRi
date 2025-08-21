@@ -1,0 +1,26 @@
+name: frontend-env
+channels:
+ - anaconda
+ - conda-forge
+dependencies:
+ - python=3.11
+ - flask
+ - flask-restful
+ - dash[testing]>2.18.2
+ - dash-bootstrap-components
+ - numpy
+ - pandas
+ - ruff
+ - pytest
+ - scikit-learn
+ - requests
+ - gunicorn
+ - python-dotenv
+ - regex
+ - pip
+ - pip:
+   - setuptools
+   - wheel
+   - bandit[toml]
+   - pdf2image
+   - opencv-python

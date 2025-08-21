@@ -1,0 +1,1423 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:7001",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/searchdata/save": {
+      "post": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Save a search data object",
+        "description": "Saves a new search data and returns the saved search data.",
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchDataDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchDataDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchdata/save-all": {
+      "post": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Save multiple search data objects",
+        "description": "Saves a list of search data objects and returns the list of saved objects.",
+        "operationId": "save_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SearchDataDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchDataDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runtime/save": {
+      "post": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Save a runtime object",
+        "description": "Saves a new runtime and returns the saved runtime.",
+        "operationId": "save_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runtime/save-all": {
+      "post": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Save multiple runtimes",
+        "description": "Saves a list of runtimes and returns the list of saved runtimes.",
+        "operationId": "save_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RuntimeDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history/save": {
+      "post": {
+        "tags": [
+          "history-controller"
+        ],
+        "summary": "Save a history",
+        "description": "Saves a new history and returns the saved history.",
+        "operationId": "save_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HistoryDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history/save-all": {
+      "post": {
+        "tags": [
+          "history-controller"
+        ],
+        "summary": "Save multiple histories",
+        "description": "Saves a list of histories and returns the list of saved histories.",
+        "operationId": "save_5",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HistoryDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/save": {
+      "post": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Save a feedback object",
+        "description": "Saves a new feedback and returns the saved feedback.",
+        "operationId": "save_6",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/save-all": {
+      "post": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Save multiple feedbacks",
+        "description": "Saves a list of feedbacks and returns the list of saved feedbacks.",
+        "operationId": "save_7",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FeedbackDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drawing/save": {
+      "post": {
+        "tags": [
+          "drawing-controller"
+        ],
+        "summary": "Save a drawing",
+        "description": "Saves a new drawing and returns the saved drawing.",
+        "operationId": "save_8",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DrawingDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drawing/save-all": {
+      "post": {
+        "tags": [
+          "drawing-controller"
+        ],
+        "summary": "Save multiple drawings",
+        "description": "Saves a list of drawings and returns the list of saved drawings.",
+        "operationId": "save_9",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DrawingDto"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DrawingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchdata/get/{id}": {
+      "get": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Retrieve a search data object by its ID",
+        "description": "Retrieves a search data object based on its ID. Yields HttpStatus.NOT_FOUND if no search data object was found.",
+        "operationId": "getSearchDataById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchDataDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchdata/get-for-drawing/{id}": {
+      "get": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Retrieve search data by its associated drawing ID",
+        "description": "Retrieves a list of search data objects associated with a specific drawing ID.Yields HttpStatus.NOT_FOUND if no search data object was found.",
+        "operationId": "getSearchDataByDrawingId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchDataDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchdata/get-all": {
+      "get": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Retrieve all search data",
+        "description": "Retrieves a list of all search data objects. Yields an empty list if no search data objects were found.",
+        "operationId": "getAllSearchData",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchDataDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runtime/get/{id}": {
+      "get": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Retrieve a runtime by its ID",
+        "description": "Retrieves a runtime based on its ID. Yields HttpStatus.NOT_FOUND if no runtime was found.",
+        "operationId": "getRuntimeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runtime/get-for-drawing/{id}": {
+      "get": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Retrieve runtimes by their associated drawing ID",
+        "description": "Retrieves a list of all runtimes associated with a specific drawing ID.Yields HttpStatus.NOT_FOUND if no runtime was found.",
+        "operationId": "getRuntimesByDrawingId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runtime/get-all": {
+      "get": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Retrieve all runtimes",
+        "description": "Retrieves a list of all runtimes.Yields an empty list if no runtimes were found.",
+        "operationId": "getAllRuntimes",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuntimeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history/get/{id}": {
+      "get": {
+        "tags": [
+          "history-controller"
+        ],
+        "summary": "Retrieve a history by its ID",
+        "description": "Retrieves a history based on its ID. Yields HttpStatus.NOT_FOUND if no history was found.",
+        "operationId": "getHistoryById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/history/get-all": {
+      "get": {
+        "tags": [
+          "history-controller"
+        ],
+        "summary": "Retrieve all histories",
+        "description": "Retrieves a list of all histories. Yields an empty list if no histories were found.",
+        "operationId": "getAllHistories",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/get/{id}": {
+      "get": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Retrieve a feedback by its ID",
+        "description": "Retrieves a feedback based on its ID. Yields HttpStatus.NOT_FOUND if no feedback was found.",
+        "operationId": "getFeedbackById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/get-for-history/{id}": {
+      "get": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Retrieve feedbacks by their associated history ID",
+        "description": "Retrieves a list of all feedbacks associated with a specific history ID.Yields HttpStatus.NOT_FOUND if no feedback was found.",
+        "operationId": "getFeedbacksByHistoryId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/get-all": {
+      "get": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Retrieve all feedbacks",
+        "description": "Retrieves a list of all feedbacks.Yields an empty list if no feedbacks were found.",
+        "operationId": "getAllFeedbacks",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drawing/get/{id}": {
+      "get": {
+        "tags": [
+          "drawing-controller"
+        ],
+        "summary": "Retrieve a drawing by its ID",
+        "description": "Retrieves a drawing based on its ID. Yields HttpStatus.NOT_FOUND if no drawing was found.",
+        "operationId": "getDrawingById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DrawingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drawing/get-all": {
+      "get": {
+        "tags": [
+          "drawing-controller"
+        ],
+        "summary": "Retrieve all drawings",
+        "description": "Retrieves a list of all drawings. Yields an empty list if no drawings were found.",
+        "operationId": "getAllDrawings",
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DrawingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/searchdata/delete/{id}": {
+      "delete": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Delete a search data object by its ID",
+        "description": "Deletes a search data object based on its ID.",
+        "operationId": "deleteSearchDataById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/searchdata/delete-for-drawing/{id}": {
+      "delete": {
+        "tags": [
+          "search-data-controller"
+        ],
+        "summary": "Delete search data by its associated drawing ID",
+        "description": "Deletes search data associated with a specific drawing ID.",
+        "operationId": "deleteSearchDataByDrawingId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/runtime/delete/{id}": {
+      "delete": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Delete a runtime by its ID",
+        "description": "Deletes a runtime based on its ID.",
+        "operationId": "deleteRuntimeById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/runtime/delete-for-drawing/{id}": {
+      "delete": {
+        "tags": [
+          "runtime-controller"
+        ],
+        "summary": "Delete runtimes by ist associated drawing ID",
+        "description": "Deletes all runtimes associated with a specific drawing ID.",
+        "operationId": "deleteRuntimesByDrawingId",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/history/delete/{id}": {
+      "delete": {
+        "tags": [
+          "history-controller"
+        ],
+        "summary": "Delete a history by its ID",
+        "description": "Deletes a history based on its ID.",
+        "operationId": "deleteHistoryById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/feedback/delete/{id}": {
+      "delete": {
+        "tags": [
+          "feedback-controller"
+        ],
+        "summary": "Delete a feedback by its ID",
+        "description": "Deletes a feedback based on its ID.",
+        "operationId": "deleteFeedbackById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/drawing/delete/{id}": {
+      "delete": {
+        "tags": [
+          "drawing-controller"
+        ],
+        "summary": "Delete a drawing by its ID",
+        "description": "Deletes a drawing based on its ID.",
+        "operationId": "deleteDrawingById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SearchDataDto": {
+        "type": "object",
+        "properties": {
+          "searchdata_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "drawing_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shape": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "material": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "general_tolerances": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "surfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gdts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threads": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outer_dimensions": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "search_vector": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "part_number": {
+            "type": "string"
+          },
+          "ocr_text": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "runtime_text": {
+            "type": "string"
+          }
+        }
+      },
+      "RuntimeDto": {
+        "type": "object",
+        "properties": {
+          "runtime_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "drawing_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "machine": {
+            "type": "string"
+          },
+          "machine_runtime": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "FeedbackDto": {
+        "type": "object",
+        "properties": {
+          "history_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "drawing_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feedback_desc": {
+            "type": "string"
+          },
+          "feedback_value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feedback_id": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "readOnly": true
+      },
+      "HistoryDto": {
+        "type": "object",
+        "properties": {
+          "query_drawing": {
+            "type": "string"
+          },
+          "query_path": {
+            "type": "string"
+          },
+          "history_id": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "feedbacks": {
+            "type": "array",
+            "readOnly": true,
+            "items": {
+              "$ref": "#/components/schemas/FeedbackDto"
+            }
+          }
+        }
+      },
+      "DrawingDto": {
+        "type": "object",
+        "properties": {
+          "drawing_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "original_drawing": {
+            "type": "string"
+          },
+          "runtimes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuntimeDto"
+            }
+          },
+          "searchdata": {
+            "$ref": "#/components/schemas/SearchDataDto"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackDto"
+            }
+          }
+        }
+      }
+    }
+  }
+}

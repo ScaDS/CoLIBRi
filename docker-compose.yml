@@ -1,0 +1,106 @@
+name: "infoextract"
+
+# Service definition
+services:
+
+  # PostgreSQL database container
+  database:
+    container_name: database
+    image: postgres:latest
+    ports:
+      - "7011:5432"
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=db_admin
+      - POSTGRES_PASSWORD=yYjMvUtEpJVYomQp?-Y4
+      - PGUSER=db_admin
+    volumes:
+      # persist data from internal path /var/lib/postgresql/data to named volume pgdb-data on disk
+      - pgdb-data:/var/lib/postgresql/data
+      # Bind local folder databse/initdb with initialization scripts to internal path docker-entrypoint-initdb.d
+      - ./database/initdb/:/docker-entrypoint-initdb.d
+      # Bind local folder database/resources to internal path where COPY can access it
+      - ./database/resources/example_data/:/var/lib/postgresql/resources/example_data
+    networks:
+      - app-net
+
+  # Spring application container
+  spring-app:
+    container_name: spring-app
+    build:
+      # Build container with provided Dockerfile
+      context: ./database
+      dockerfile: Dockerfile
+    ports:
+      - "7001:8080"
+    restart: always
+    depends_on:
+      - database
+    environment:
+      # Env variables will overwrite variables in Spring application.properties
+      - POSTGRES_HOST=database:5432
+      - POSTGRES_APP_DB=app_db
+      - POSTGRES_APP_USER=app_db_user
+      # A hash of the following password is used to initialize the database
+      # See file database/initdb/1_user_schema.sql
+      - POSTGRES_APP_PASSWORD=qS2OwNOCZeaVqoaW6lZC
+      # Give JVM a sane heap size, adjust -Xmx to what your machine can spare
+      - JAVA_TOOL_OPTIONS=-Xms256m -Xmx1g
+    networks:
+      - app-net
+
+  # Python application container with preprocessor
+  preprocessor-app:
+    container_name: preprocessor-app
+    build:
+      # Build container with provided Dockerfile
+      context: ./preprocessor
+      dockerfile: Dockerfile
+      args:
+        PP_PORT: 6001
+        GPU_ID: 0
+    ports:
+      - "6001:6001"
+    restart: always
+    depends_on:
+      - spring-app
+    # NVIDIA GPU usage
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ["0"]
+            capabilities: [gpu]
+    networks:
+      - app-net
+
+  # Python application container with frontend
+  frontend-app:
+    container_name: frontend-app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        APP_PORT: 5001
+    ports:
+      - "5001:5001"
+    restart: always
+    depends_on:
+      - spring-app
+      - preprocessor-app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    networks:
+      - app-net
+
+# Networks
+networks:
+  app-net:
+    driver: bridge
+
+# Named volumes
+volumes:
+  pgdb-data: {}

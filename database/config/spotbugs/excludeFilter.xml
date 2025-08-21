@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/4.8.4"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/4.8.4 https://raw.githubusercontent.com/spotbugs/spotbugs/4.8.4/spotbugs/etc/findbugsfilter.xsd">
+    <!-- Example: exclude ignored return variable
+    <Match>
+        <Class name="package.ClassName"/>
+        <Method name="methodName"/>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+    </Match>
+    -->
+
+    <Match>
+        <!-- Disable warnings about overly permissive CORS -->
+        <Bug pattern="PERMISSIVE_CORS"/>
+    </Match>
+    <Match>
+        <!-- Disable warnings about mutable objects and the use of public fields.
+             EI_EXPOSE_REP: May expose internal representation by returning reference to mutable object
+             EI_EXPOSE_REP2: May expose internal representation by incorporating reference to mutable object
+        -->
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

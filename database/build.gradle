@@ -1,0 +1,86 @@
+plugins {
+	id "java"
+	id "org.springframework.boot" version "3.5.4"
+	id "io.spring.dependency-management" version "1.1.7"
+	id "checkstyle"
+	id "pmd"
+	id "com.github.spotbugs" version "6.2.5"
+	id "org.owasp.dependencycheck" version "12.1.3"
+	id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
+}
+
+group = "de.scadsai"
+version = "0.0.1-SNAPSHOT"
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation "org.modelmapper:modelmapper:3.2.4"
+	compileOnly "org.projectlombok:lombok"
+	developmentOnly "org.springframework.boot:spring-boot-devtools"
+	runtimeOnly "com.h2database:h2"
+	runtimeOnly "org.postgresql:postgresql"
+	annotationProcessor "org.projectlombok:lombok"
+	testImplementation "org.springframework.boot:spring-boot-starter-test"
+	testImplementation "org.wiremock:wiremock-standalone:3.13.1"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9"
+}
+
+// Configuration of checkstyle plugin
+checkstyle {
+	configFile = file("${layout.projectDirectory}/config/checkstyle/checkstyle.xml")
+}
+checkstyleMain {
+	source = "src/main/java"
+}
+checkstyleTest {
+	source = "src/test/java"
+}
+// Configuration of PMD plugin
+pmd {
+	consoleOutput = true
+	toolVersion = "7.12.0"
+	rulesMinimumPriority = 5
+	ruleSetFiles = files("${layout.projectDirectory}/config/pmd/pmd.xml")
+}
+// Configuration of Spotbugs plugin
+spotbugs {
+	excludeFilter = file("${layout.projectDirectory}/config/spotbugs/excludeFilter.xml")
+}
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+	reports {
+		xml.required.set(false)
+		html.required.set(true)
+	}
+}
+
+// Configuration of open api plugin
+openApi {
+    apiDocsUrl.set("http://localhost:7001/v3/api-docs")
+    outputDir.set(file("config/docs"))
+}
+// Do not build a plain jar
+tasks.named("jar") {
+	enabled = false
+}
+// Use JUnit as test platform
+tasks.named("test") {
+	useJUnitPlatform()
+}

@@ -1,0 +1,43 @@
+name: preprocessor-env
+channels:
+ - nvidia
+ - anaconda
+ - conda-forge
+dependencies:
+ - python=3.11
+ - pytest
+ - cuda=11.8
+ - cuda-compiler==11.8
+ - cuda-runtime==11.8
+ - cuda-tools=11.8
+ - cuda-toolkit=11.8
+ - cuda-version=11.8
+ - cuda-command-line-tools=11.8
+ - cudnn=8.8
+ - cuda-nvrtc
+ - tesseract
+ - pytesseract
+ - flask
+ - flask-restful
+ - ruff
+ - numpy
+ - pillow
+ - scikit-learn
+ - scikit-image
+ - gunicorn
+ - pdf2image
+ - poppler
+ - pip==23.0.1
+ - pip:
+   - -r requirements.txt # runs requirements.txt -> this can use -f (for wheels). This is not possible in this .yml
+   - wheel
+   - setuptools
+   - regex
+   - fuzzysearch
+   - fuzzywuzzy
+   - python-Levenshtein # speeds up fuzzywuzzy, if not installed fuzzywuzzy throws a warning
+   - opencv-python #-headless # non headless version sometimes creates problems with MMOCR
+   - paddleocr==2.10.0
+   - bandit[toml]>=1.8.6
+   - nnunetv2
+   - git+https://github.com/openai/CLIP.git
