@@ -40,7 +40,7 @@ requires-python = ">=3.11"
 authors = [
   {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
   {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
-  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" },
   {name = "Julian Mosig von Aehrenfeld", email = "gr15iped@studserv.uni-leipzig.de" }
 ]
 

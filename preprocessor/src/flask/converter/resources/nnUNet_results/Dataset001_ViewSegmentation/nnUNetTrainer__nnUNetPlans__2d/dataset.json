@@ -1,0 +1,15 @@
+{
+    "channel_names": {
+        "0": "R",
+        "1": "G",
+        "2": "B"
+    },
+    "labels": {
+        "background": 0,
+        "clutter": 1,
+        "shape": 2
+    },
+    "numTraining": 128,
+    "file_ending": ".png",
+    "name": "Dataset001_ViewSegmentation"
+}
