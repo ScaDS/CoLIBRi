@@ -99,7 +99,11 @@ services:
 # Networks
 networks:
   app-net:
-    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.208.0/20
+          gateway: 192.168.208.1
 
 # Named volumes
 volumes:
