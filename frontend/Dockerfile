@@ -18,7 +18,7 @@ RUN chmod +x ./entrypoint.sh
 COPY src ./src
 
 # Create or update the conda environment
-# TODO: RUN conda config --prepend envs_dirs "/opt/conda-envs"
+RUN conda env create -f /app/frontend-conda-env.yml
 
 # expose port 5001 to access it from outside of the container
 EXPOSE ${APP_PORT}
