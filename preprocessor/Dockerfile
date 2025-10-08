@@ -19,7 +19,7 @@ RUN chmod +x ./entrypoint.sh
 COPY src ./src
 
 # Create or update the conda environment
-RUN conda env create -f /app/preprocessor-conda-env.yml
+RUN conda env create -f /app/preprocessor-conda-env.yml --no-deps
 
 # Expose PP_PORT to access from outside
 EXPOSE ${PP_PORT}
