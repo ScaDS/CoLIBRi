@@ -1,6 +1,6 @@
-# info-extract
+# CoLIBRi
 
-AI based information extraction and retrieval for similarity search on technical drawings.
+Supporting quotation through multi-modal retrieval and conversational search on technical drawings.  
 
 ## Components
 
