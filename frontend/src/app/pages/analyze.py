@@ -7,15 +7,15 @@ import plotly.express as px
 from dash import MATCH, Input, Output, State, callback, callback_context, dcc, exceptions, html, register_page
 from dash_chat import ChatComponent
 
-from frontend.src.app.search_engine import SearchEngine
-from frontend.src.app.technical_drawing import (
+from src.app.search_engine import SearchEngine
+from src.app.technical_drawing import (
     TechnicalDrawing,
     convert_database_response_to_technical_drawing,
     convert_dict_to_technical_drawing,
     convert_preprocessor_response_to_technical_drawing,
     convert_technical_drawing_to_dict,
 )
-from frontend.src.app.utils import (
+from src.app.utils import (
     convert_bytestring_to_cv2,
     get_drawing_data_for_drawing_ids,
     send_request_to_database,

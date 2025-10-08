@@ -7,9 +7,9 @@ import torch
 from nnunetv2.inference.predict_from_raw_data import nnUNetPredictor
 from skimage.feature import blob_log
 
-from preprocessor.src.flask.converter.consts import LINE_WIDTH, MAX_CONTOUR_AREA, MAX_RECT_AREA, MIN_TRI_INTER_RATIO
-from preprocessor.src.flask.converter.table_extract import validate_rectangle
-from preprocessor.src.flask.converter.utils import binarize, create_mask, find_contours, get_cropped_views
+from src.flask.converter.consts import LINE_WIDTH, MAX_CONTOUR_AREA, MAX_RECT_AREA, MIN_TRI_INTER_RATIO
+from src.flask.converter.table_extract import validate_rectangle
+from src.flask.converter.utils import binarize, create_mask, find_contours, get_cropped_views
 
 
 def validate_line(coords, other_coords, image):

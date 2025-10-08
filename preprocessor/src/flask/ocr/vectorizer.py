@@ -4,8 +4,8 @@ from importlib.resources import files
 
 import numpy as np
 
-import preprocessor.src.flask.ocr.resources.json as json_resource_dir
-from preprocessor.src.flask.ocr.utils import fuzzy_match, get_numbers
+import src.flask.ocr.resources.json as json_resource_dir
+from src.flask.ocr.utils import fuzzy_match, get_numbers
 
 
 def get_material_vector(drawing_materials):

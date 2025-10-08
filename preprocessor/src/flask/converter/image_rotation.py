@@ -7,9 +7,9 @@ import numpy as np
 import pytesseract
 from pytesseract import TesseractError
 
-import preprocessor.src.flask.converter.resources as resource_dir
-from preprocessor.src.flask.converter.consts import BIN_THRESH
-from preprocessor.src.flask.converter.utils import binarize, find_rectangles
+import src.flask.converter.resources as resource_dir
+from src.flask.converter.consts import BIN_THRESH
+from src.flask.converter.utils import binarize, find_rectangles
 
 
 def rotate_image_multiple_of_90(image, rotation):

@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
 
-from preprocessor.src.flask.converter.consts import LINE_WIDTH
-from preprocessor.src.flask.converter.shape_extract import remove_dimension_arrows_and_lines, remove_text_and_tables
-from preprocessor.src.flask.converter.table_extract import validate_rectangle
-from preprocessor.src.flask.converter.utils import View, binarize, create_mask, find_contours, get_cropped_views
-from preprocessor.src.flask.shapes.vectorizer import choose_representative_embedding, generate_embeddings
+from src.flask.converter.consts import LINE_WIDTH
+from src.flask.converter.shape_extract import remove_dimension_arrows_and_lines, remove_text_and_tables
+from src.flask.converter.table_extract import validate_rectangle
+from src.flask.converter.utils import View, binarize, create_mask, find_contours, get_cropped_views
+from src.flask.shapes.vectorizer import choose_representative_embedding, generate_embeddings
 
 
 def get_representative_view(shape_image, most_representative_idx):

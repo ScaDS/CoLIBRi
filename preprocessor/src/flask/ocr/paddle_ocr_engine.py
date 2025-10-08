@@ -4,7 +4,7 @@ import numpy as np
 import paddle
 from paddleocr import PaddleOCR
 
-import preprocessor.src.flask.ocr.resources.paddleocr_files as paddleocr_dir
+import src.flask.ocr.resources.paddleocr_files as paddleocr_dir
 
 
 class OCREngine:

@@ -6,8 +6,8 @@ import regex
 from fuzzysearch import find_near_matches
 from fuzzywuzzy import fuzz
 
-import preprocessor.src.flask.ocr.resources.json as json_resource_dir
-from preprocessor.src.flask.ocr.utils import fuzzy_match, get_numbers
+import src.flask.ocr.resources.json as json_resource_dir
+from src.flask.ocr.utils import fuzzy_match, get_numbers
 
 
 def find_position_of_din_code(text, code):

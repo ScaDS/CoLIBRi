@@ -1,19 +1,19 @@
 from datetime import datetime
 
-from preprocessor.src.flask.converter.image_rotation import (
+from src.flask.converter.image_rotation import (
     get_image_rotation,
     rotate_image_multiple_of_90,
     rotate_separation_outputs,
 )
-from preprocessor.src.flask.converter.image_std import convert_cv2_to_bytestring, load_and_standardize
-from preprocessor.src.flask.converter.shape_extract import init_unet, remove_dimension_arrows_and_lines
-from preprocessor.src.flask.converter.table_extract import separate
-from preprocessor.src.flask.converter.utils import grayscale_to_rgb
-from preprocessor.src.flask.ocr.context_merger import merge_text_in_image
-from preprocessor.src.flask.ocr.extraction import extract
-from preprocessor.src.flask.ocr.paddle_ocr_engine import OCREngine
-from preprocessor.src.flask.ocr.vectorizer import vectorize_extraction
-from preprocessor.src.flask.shapes.vectorizer import choose_representative_embedding, generate_embeddings
+from src.flask.converter.image_std import convert_cv2_to_bytestring, load_and_standardize
+from src.flask.converter.shape_extract import init_unet, remove_dimension_arrows_and_lines
+from src.flask.converter.table_extract import separate
+from src.flask.converter.utils import grayscale_to_rgb
+from src.flask.ocr.context_merger import merge_text_in_image
+from src.flask.ocr.extraction import extract
+from src.flask.ocr.paddle_ocr_engine import OCREngine
+from src.flask.ocr.vectorizer import vectorize_extraction
+from src.flask.shapes.vectorizer import choose_representative_embedding, generate_embeddings
 
 
 def stopwatch(func, *args, **kwargs):

@@ -6,8 +6,8 @@ import numpy as np
 import pdf2image
 from PIL import Image
 
-from preprocessor.src.flask.converter.consts import LINE_WIDTH
-from preprocessor.src.flask.converter.utils import binarize, rgb_to_grayscale, rotate_image
+from src.flask.converter.consts import LINE_WIDTH
+from src.flask.converter.utils import binarize, rgb_to_grayscale, rotate_image
 
 # to prevent error due to images being too large
 Image.MAX_IMAGE_PIXELS = 10000000000

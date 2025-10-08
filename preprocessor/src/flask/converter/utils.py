@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from preprocessor.src.flask.converter.consts import BIN_THRESH, LINE_WIDTH, MIN_RECT_AREA, MIN_RECT_INTER_RATIO
+from src.flask.converter.consts import BIN_THRESH, LINE_WIDTH, MIN_RECT_AREA, MIN_RECT_INTER_RATIO
 
 
 def rgb_to_grayscale(rgb_image):
