@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from PIL import Image
 
-from preprocessor.src.flask.converter.utils import get_cropped_views
+from src.flask.converter.utils import get_cropped_views
 
 
 def generate_embeddings(shape_image):

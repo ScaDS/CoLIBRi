@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from preprocessor.src.flask.converter.utils import binarize, find_rectangles, validate_rectangle
+from src.flask.converter.utils import binarize, find_rectangles, validate_rectangle
 from src.flask.converter.consts import (
     DIST_THRESH,
     LINE_WIDTH,
