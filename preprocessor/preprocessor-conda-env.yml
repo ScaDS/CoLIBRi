@@ -1,4 +1,4 @@
-name: cpt_ms-preprocessor-paddle-env
+name: preprocessor-env
 channels:
   - nvidia
   - conda-forge
