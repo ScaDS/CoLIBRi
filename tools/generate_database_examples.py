@@ -9,6 +9,8 @@ import sys
 import pandas as pd
 import requests
 
+from get_llm_examples import get_llm_examples
+
 def send_request_to_preprocessor(resource, content=None, type="post"):
     """
     Sends request preprocessor resource and returns response json. If return status code is not 200, will return
@@ -19,6 +21,18 @@ def send_request_to_preprocessor(resource, content=None, type="post"):
     :return: json response from endpoint
     """
     url = "http://172.26.44.37:6101" + resource
+    return send_request_to(url, content, type)
+
+def send_request_to_llm_backend(resource, content=None, type="post"):
+    """
+    Sends request conv-search backennd resource and returns response json. If return status code is not 200, will return
+    dictionary with key "ERROR".
+    :param resource: the REST resource to be called, e.g. /drawing/get/1 (include leading /)
+    :param content: the payload of the request, e.g. json data for saving a drawing
+    :param type: post, get, or delete
+    :return: json response from endpoint
+    """
+    url = "http://172.26.44.37:9101" + resource
     return send_request_to(url, content, type)
 
 
@@ -87,7 +101,7 @@ def remove_empty_text(text_array):
     return text_array
 
 
-def handle_preprocessing_result(prepro_result: dict, drawing_id, part_number, path, full_text, machine, runtime):
+def handle_preprocessing_result(prepro_result: dict, drawing_id, part_number, path, full_text, machine, runtime, llm_text, llm_vector):
     """
     Converts preprocessor response into a Dataframe.
     :param prepro_result: Preprocessor response dictionary.
@@ -106,6 +120,8 @@ def handle_preprocessing_result(prepro_result: dict, drawing_id, part_number, pa
         "runtime_text": [full_text],
         "machines": [machine],
         "runtimes": [runtime],
+        "llm_text": [llm_text],
+        "llm_vector": [llm_vector],
     }
     drawing_data = prepro_result["drawing_data"]
     ocr_vector = prepro_result["ocr_vector"]
@@ -155,23 +171,31 @@ def iterate_preprocess(drawing_ids, part_numbers, drawing_paths, data_dir):
             "threads",
             "outer_dimensions",
             "search_vector",
+            "llm_text",
+            "llm_vector",
         ]
     ).set_index("drawing_id")
     for drawing_id, part_number, drawing_path in zip(drawing_ids, part_numbers, drawing_paths, strict=True):
-        try:
-            file = file_to_base64(os.path.join(data_dir, drawing_path))  # load file as bytes
-            file_data = {"file_name": drawing_path, "file_content": file}
-            preprocessing_result = send_request_to_preprocessor(
-                resource="/image_to_vector", content=file_data, type="post"
-            )
-            print(preprocessing_result)
-            result_df = handle_preprocessing_result(
-                preprocessing_result, drawing_id, part_number, drawing_path, "", "", ""
-            )  # convert the dictionary from preprocessor to a dataframe
-            batch_df = pd.concat([batch_df, result_df])
-        except Exception as e:
-            print("Exception occured during preprcoess iteration:", e)
-            continue
+        print(f"Processing drawing {drawing_id}...: {drawing_path}")
+        # try:
+        file = file_to_base64(os.path.join(data_dir, drawing_path))  # load file as bytes
+        file_data = {"file_name": drawing_path, "file_content": file}
+        preprocessing_result = send_request_to_preprocessor(
+            resource="/image_to_vector", content=file_data, type="post"
+        )
+        print("preprocessing result:", preprocessing_result)
+
+        llm_text, llm_vector = get_llm_examples(preprocessing_result, str(part_number))
+
+        result_df = handle_preprocessing_result(
+            preprocessing_result, drawing_id, part_number, drawing_path, "", "", "", llm_text,
+            llm_vector
+        )  # convert the dictionary from preprocessor to a dataframe
+
+        batch_df = pd.concat([batch_df, result_df])
+        # except Exception as e:
+        #     print("Exception occured during preprcoess iteration:", e)
+        #     continue
 
     return batch_df
 
@@ -271,6 +295,8 @@ def convert_to_separate_dfs(monolithic_df, result_dir):
             "part_number",
             "ocr_text",
             "runtime_text",
+            "llm_text",
+            "llm_vector",
         ]
     ]
     drawings = monolithic_df[["original_drawing"]]
