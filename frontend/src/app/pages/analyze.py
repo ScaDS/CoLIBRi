@@ -23,17 +23,15 @@ from src.app.utils import (
     send_request_to_preprocessor,
 )
 
-# TODO change name of cpt_distance???
-
 # save time during development by caching preprocessing response
 # this will load a response file, so make sure this exists already
-LOCAL_DEVELOP = True
+LOCAL_DEVELOP = False
 
 if LOCAL_DEVELOP:
     import json
     from importlib.resources import files
 
-    import frontend.test.resources as resource_dir
+    import your_resource_dir as resource_dir  # change this as well
 
 register_page(__name__, path="/")
 
@@ -485,7 +483,7 @@ def update_search_engine(
             scaled_weights.append(weight / weights_sum)
     print("New Weights: ", scaled_weights, flush=True)
 
-    search_engine = SearchEngine(dataset, ids, "cpt_distance", weights)
+    search_engine = SearchEngine(dataset, ids, "colibri_distance", weights)
 
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -532,7 +530,7 @@ def init_search_engine(dummy):
         dataset.append(response["search_vector"])
 
     # init the search engine using the data
-    metric = "cpt_distance"
+    metric = "colibri_distance"
     try:
         start = datetime.now()
         search_engine = SearchEngine(dataset, ids, metric, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR])

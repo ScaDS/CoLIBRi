@@ -16,8 +16,8 @@ class SearchEngine:
         :param weights: array of weights to use when computing distances. should be of length 7
         """
         self.ids = ids
-        if metric == "cpt_distance":
-            metric = self.cpt_distance
+        if metric == "colibri_distance":
+            metric = self.colibri_distance
         self.weights = weights
         self.search_tree = BallTree(dataset, metric=metric)
 
@@ -31,7 +31,7 @@ class SearchEngine:
         dist, ind = self.search_tree.query(query_vector, k)
         return [self.ids[i] for i in ind[0]], dist
 
-    def cpt_distance(self, v1, v2):
+    def colibri_distance(self, v1, v2):
         """
         Computes distance between search vectors.
         Args:
