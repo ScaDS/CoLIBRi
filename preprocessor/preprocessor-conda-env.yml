@@ -231,6 +231,7 @@ dependencies:
   - zlib-ng=2.2.2=h5888daf_0
   - zstd=1.5.6=ha6fb4c9_0
   - pip:
+      - -r requirements.txt # runs requirements.txt -> this can use -f (for wheels). This is not possible in this .yml
       - acvl-utils==0.2
       - albucore==0.0.13
       - albumentations==1.4.10
@@ -307,7 +308,6 @@ dependencies:
       - opencv-python-headless==4.10.0.84
       - opt-einsum==3.3.0
       - paddleocr==2.9.1
-      - paddlepaddle-gpu==3.0.0b1
       - pandas==2.2.3
       - pbr==6.1.0
       - protobuf==5.28.3
