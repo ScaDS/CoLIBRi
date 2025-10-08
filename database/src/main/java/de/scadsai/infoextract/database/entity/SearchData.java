@@ -133,4 +133,22 @@ public class SearchData {
     columnDefinition = "text"
   )
   private String runtimeText;
+
+   /**
+   * Text field used for llm
+   */
+  @Column(
+    name = "llm_text",
+    columnDefinition = "text"
+  )
+  private String llmText;
+
+   /**
+   * Numerical text embedding used for llm
+   */
+  @Column(
+    name = "llm_vector",
+    columnDefinition = "float ARRAY"
+  )
+  private float[] llmVector;
 }

@@ -22,6 +22,8 @@ import lombok.Getter;
  *  SearchData.partNumber -> SearchDataDto.partNumber
  *  SearchData.ocrText -> SearchDataDto.ocrText
  *  SearchData.runtimeText -> SearchDataDto.runtimeText
+ *  SearchData.llmText -> SearchDataDto.llmText
+ *  SearchData.llmVector -> SearchDataDto.llmVector
  */
 @AllArgsConstructor
 @Getter
@@ -105,4 +107,16 @@ public class SearchDataDto {
    */
   @JsonProperty("runtime_text")
   private final String runtimeText;
+
+   /**
+   * Text field used for llm
+   */
+  @JsonProperty("llm_text")
+  private final String llmText;
+
+   /**
+   * Numerical text embedding used for llm
+   */
+  @JsonProperty("llm_vector")
+  private final float[] llmVector;
 }

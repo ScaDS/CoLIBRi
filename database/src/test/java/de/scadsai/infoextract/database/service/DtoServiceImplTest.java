@@ -213,7 +213,9 @@ class DtoServiceImplTest {
       new float[]{},
       "",
       new String[]{},
-      ""
+      "",
+      "",
+      new float[]{}
     );
 
     FeedbackDto feedbackDto = new FeedbackDto(
@@ -341,7 +343,9 @@ class DtoServiceImplTest {
       new float[]{},
       "",
       new String[]{},
-      ""
+      "",
+      "",
+      new float[]{}
     );
 
     Mockito.when(drawingRepository.findById(1)).thenReturn(Optional.of(drawing));

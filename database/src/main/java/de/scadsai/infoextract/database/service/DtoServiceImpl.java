@@ -55,7 +55,9 @@ public class DtoServiceImpl implements DtoService {
         drawing.getSearchData().getSearchVector(),
         drawing.getSearchData().getPartNumber(),
         drawing.getSearchData().getOcrText(),
-        drawing.getSearchData().getRuntimeText()
+        drawing.getSearchData().getRuntimeText(),
+        drawing.getSearchData().getLlmText(),
+        drawing.getSearchData().getLlmVector()
       );
 
     List<RuntimeDto> runtimeDtos = drawing.getRuntimes() == null ? null :
@@ -104,7 +106,9 @@ public class DtoServiceImpl implements DtoService {
         drawingDto.getSearchData().getSearchVector(),
         drawingDto.getSearchData().getPartNumber(),
         drawingDto.getSearchData().getOcrText(),
-        drawingDto.getSearchData().getRuntimeText()
+        drawingDto.getSearchData().getRuntimeText(),
+        drawingDto.getSearchData().getLlmText(),
+        drawingDto.getSearchData().getLlmVector()
       );
 
     List<Runtime> runtimes = drawingDto.getRuntimes() == null ? null :
@@ -188,7 +192,9 @@ public class DtoServiceImpl implements DtoService {
       searchData.getSearchVector(),
       searchData.getPartNumber(),
       searchData.getOcrText(),
-      searchData.getRuntimeText()
+      searchData.getRuntimeText(),
+      searchData.getLlmText(),
+      searchData.getLlmVector()
     );
   }
 
@@ -212,7 +218,9 @@ public class DtoServiceImpl implements DtoService {
       searchDataDto.getSearchVector(),
       searchDataDto.getPartNumber(),
       searchDataDto.getOcrText(),
-      searchDataDto.getRuntimeText()
+      searchDataDto.getRuntimeText(),
+      searchDataDto.getLlmText(),
+      searchDataDto.getLlmVector()
     );
   }
 
