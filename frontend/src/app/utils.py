@@ -63,7 +63,7 @@ def send_request_to_preprocessor(resource, content=None, type="post"):
     :param type: post, get, or delete
     :return: json response from endpoint
     """
-    url = "http://preprocessor:6201" + resource
+    url = "http://preprocessor-app:6201" + resource
     return send_request_to(url, content, type)
 
 
@@ -75,7 +75,7 @@ def send_request_to_llm_backend(resource, content=None, type="post"):
     :param type: for the /chatbot endpoint, this will be post
     :return: json response, for /chatbot this will be the updated messages and technical_drawing_ids
     """
-    url = "http://conv-search:9201" + resource  # url and port of the flask llm backend
+    url = "http://conv-search-app:9201" + resource  # url and port of the flask llm backend
     return send_request_to(url, content, type)
 
 
