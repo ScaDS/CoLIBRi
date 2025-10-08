@@ -1,5 +1,6 @@
 name: frontend-env
 channels:
+ - defaults
  - anaconda
  - conda-forge
 dependencies:
@@ -23,4 +24,5 @@ dependencies:
    - wheel
    - bandit[toml]
    - pdf2image
+   - dash_chat
    - opencv-python
