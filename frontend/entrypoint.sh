@@ -1,6 +1,6 @@
 #!/bin/sh
 exec conda run --no-capture-output -n frontend-env gunicorn \
-  --bind "0.0.0.0:${APP_PORT}" \
+  --bind "0.0.0.0:5201" \
   --timeout 600 \
   --chdir ./src/app \
   app:server \
