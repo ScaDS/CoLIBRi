@@ -20,7 +20,7 @@ def send_request_to_preprocessor(resource, content=None, type="post"):
     :param type: post, get, or delete
     :return: json response from endpoint
     """
-    url = "http://172.26.44.37:6101" + resource
+    url = "localhost:6201" + resource
     return send_request_to(url, content, type)
 
 def send_request_to_llm_backend(resource, content=None, type="post"):
@@ -32,7 +32,7 @@ def send_request_to_llm_backend(resource, content=None, type="post"):
     :param type: post, get, or delete
     :return: json response from endpoint
     """
-    url = "http://172.26.44.37:9101" + resource
+    url = "localhost:9201" + resource
     return send_request_to(url, content, type)
 
 
@@ -334,9 +334,9 @@ def convert_to_separate_dfs(monolithic_df, result_dir):
 
 if __name__ == "__main__":
     # Directory of the dataset with all images
-    CPT_DATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "../example_data/"
+    DATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "../example_data/"
     # output file
     OUTPUT_DIR = str(sys.argv[2]) if len(sys.argv) > 2 else "../database/resources/example_data/"
 
-    df = load_and_apply_preprocessing(CPT_DATA_DIR, OUTPUT_DIR)
+    df = load_and_apply_preprocessing(DATA_DIR, OUTPUT_DIR)
     convert_to_separate_dfs(df, OUTPUT_DIR)
