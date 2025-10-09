@@ -96,6 +96,28 @@ services:
     networks:
       - app-net
 
+  # Service for LLM backend
+  conv-search:
+    platform: linux/amd64
+    container_name: conv-search-app
+    build:
+      # Build container with provided Dockerfile
+      context: ./conv-search
+      dockerfile: Dockerfile
+      args:
+        CS_PORT: 9201
+    ports:
+      - 9201:9201
+    restart: always
+    networks:
+      - app-net
+    env_file: .env
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - /opt/api_keys:/opt/api_keys  # change this to where you have stored your api keys
+
 # Networks
 networks:
   app-net:

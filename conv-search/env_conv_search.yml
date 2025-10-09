@@ -1,0 +1,43 @@
+name: conv-search-env
+channels:
+  - defaults
+  - anaconda
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pytest
+  - flask
+  - flask-restful
+  - ruff
+  - numpy
+  - gunicorn
+  - requests
+  - pandas
+  - python-dotenv
+  - pip
+  - matplotlib
+  - pip:
+      - wheel
+      - setuptools
+      - bandit[toml]
+      - llama-index
+      - llama-index-llms-ollama
+      - ollama
+      - ipykernel
+      - llama-index-multi-modal-llms-ollama==0.4.0
+      - open_clip_torch
+      - llama-index-vector-stores-qdrant
+      - llama-index-embeddings-clip
+      - open-clip-torch
+      - git+https://github.com/openai/CLIP.git
+      - llama-index-embeddings-huggingface
+      - regex
+      - python-dotenv
+      - ijson
+      - langchain
+      - langchain-ollama
+      - langchain-openai
+      - llama-index-retrievers-bm25
+      - PyStemmer
+      - tqdm
+      - pandas

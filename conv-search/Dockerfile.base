@@ -1,0 +1,21 @@
+FROM continuumio/miniconda3:latest
+
+WORKDIR /app/
+ 
+# Create the environment with conda
+RUN conda config --prepend envs_dirs "/opt/cpt-conda-envs"
+
+ENV PYTHONPATH=/app/
+
+COPY ./src ./src
+
+COPY .env ./
+COPY names.csv ./
+
+# There is a bug in the LlamaIndex Ollama library, which is why we have to replace this file with the fixed version
+# We should remove this once we upgrade to a newer version of Ollama
+COPY fixed_ollama_base.py /opt/conda/envs/conv-search-env/lib/python3.1/site-packages/llama_index/multi_modal_llms/ollama/base.py
+
+CMD ["conda", "run", "--no-capture-output", "-n", "conv-search-env", "python", "-u", "src/flask/add_llm_embeddings.py"]
+
+#  conda run --no-capture-output -n conv-search-env python -u src/llm_backend/add_llm_embeddings.py
