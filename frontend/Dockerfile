@@ -1,5 +1,5 @@
-# Stage 1: Build miniconda image as base
-FROM continuumio/miniconda3:latest AS base
+# Stage 1: Build debian-based image with python and uv as base
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS base
 
 # Install local dependencies for cv2, do cleanup
 RUN apt-get update && \
@@ -12,19 +12,21 @@ FROM base AS runtime
 ARG APP_PORT
 WORKDIR /app/
 
-# Copy files
-COPY frontend-conda-env.yml entrypoint.sh ./
+# Copy dependency files
+COPY pyproject.toml ./
+COPY entrypoint.sh ./
 RUN chmod +x ./entrypoint.sh
+
+# Generate uv lock file and install dependencies
+RUN uv lock && uv sync --frozen --no-dev
+
+# Copy application code
 COPY src ./src
 
-# Create or update the conda environment
-RUN conda env create -f /app/frontend-conda-env.yml
-
-# expose port 5001 to access it from outside of the container
+# Expose port
 EXPOSE ${APP_PORT}
 
 # Make APP_PORT available at runtime
 ENV APP_PORT=${APP_PORT}
 
-# run with conda environment
 ENTRYPOINT ["/app/entrypoint.sh"]

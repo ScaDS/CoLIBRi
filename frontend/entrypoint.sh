@@ -1,5 +1,5 @@
 #!/bin/sh
-exec conda run --no-capture-output -n frontend-env gunicorn \
+exec uv run gunicorn \
   --bind "0.0.0.0:5201" \
   --timeout 600 \
   --chdir ./src/app \
