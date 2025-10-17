@@ -1,5 +1,5 @@
 # Stage 1: Build NVIDIA CUDA on Ubuntu with Python and uv as base image
-FROM nvidia/cuda:12.9.0-cudnn-runtime-ubuntu20.04 AS base
+FROM nvidia/cuda:12.9.0-cudnn-runtime-ubuntu22.04 AS base
 
 # Install local dependencies, do cleanup
 RUN apt-get update && apt-get install -y \
@@ -32,12 +32,7 @@ RUN chmod +x ./entrypoint.sh
 # Copy application code
 COPY src ./src
 
-# Install paddlepaddle-gpu first
-RUN uv pip install --system \
-    --find-links https://www.paddlepaddle.org.cn/packages/stable/cu129/paddlepaddle-gpu/ \
-    paddlepaddle-gpu==3.1.0
-
-# Install other dependencies from pyproject.toml
+# Install dependencies
 RUN uv pip install --system -e ".[dev]"
 
 # Expose PP_PORT to access from outside

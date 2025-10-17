@@ -65,7 +65,8 @@ dependencies = [
     "nnunetv2",
     "numpy",
     "opencv-python",
-    "paddleocr==3.2.0",
+    "paddleocr",
+    "paddlepaddle-gpu @ https://paddle-whl.bj.bcebos.com/stable/cu129/paddlepaddle-gpu/paddlepaddle_gpu-3.2.0-cp311-cp311-linux_x86_64.whl",
     "pandas",
     "pdf2image",
     "pillow",
@@ -74,6 +75,8 @@ dependencies = [
     "regex",
     "scikit-image",
     "scikit-learn",
+    "torch",
+    "torchvision",
     "wheel",
 ]
 
@@ -90,6 +93,15 @@ dev = [
     "pytest",
     "ruff",
 ]
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true  # prevent packages from being installed from that index unless explicitly pinned to it
 
 # Configurations for the tools used in project
 [tool.ruff]
