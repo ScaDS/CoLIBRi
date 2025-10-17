@@ -13,19 +13,19 @@ build-backend = "setuptools.build_meta"
 # This is the name of the project. The first time you publish this
 # package, this name will be registered for you. Restrictions:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "preprocessor"
+name = "CoLIBRi-preprocessor"
 
 # Versions should comply with PEP 440
 version = "0.0.1"
 
 # This is a one-line description of what the project does:
 # https://packaging.python.org/specifications/core-metadata/#summary
-description = "Preprocessor microservice within the prototype app"
+description = "Preprocessor microservice of CoLIBRi"
 
 # This is an optional longer description of the project.
 # Often, the same as the README, corresponds to:
 # https://packaging.python.org/specifications/core-metadata/#description-optional
-#readme = "README.md"
+readme = "README.md"
 
 # Specify which Python versions are supported. 'pip install' will check this
 # and refuse to install the project if the version does not match:
@@ -38,23 +38,44 @@ requires-python = ">=3.11"
 
 # Names of the persons or organization who originally authored the project.
 authors = [
-  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
-  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
-  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+    {name = "Lucas Peter", email = "lucas.peter@uni-leipzig.de" },
+    {name = "Jacob Pollack", email = "jacob.pollack@uni-leipzig.de" },
+    {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" },
 ]
 
 # Names of the persons or organization who currently maintain the project.
 maintainers = [
-  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
-  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
-  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+    {name = "Lucas Peter", email = "lucas.peter@uni-leipzig.de" },
+    {name = "Jacob Pollack", email = "jacob.pollack@uni-leipzig.de" },
+    {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" },
 ]
 
 # Other packages that the project depends on to run.
 # Any package you put here will be installed by pip when your project is
 # installed, so they must be valid existing projects. See:
 # https://packaging.python.org/discussions/install-requires-vs-requirements/
-#dependencies = [ "some-dependency" ]
+dependencies = [
+    "clip @ git+https://github.com/openai/CLIP.git",
+    "flask",
+    "flask-restful",
+    "fuzzysearch",
+    "fuzzywuzzy",
+    "gunicorn",
+    "joblib",
+    "nnunetv2",
+    "numpy",
+    "opencv-python",
+    "paddleocr==3.2.0",
+    "pandas",
+    "pdf2image",
+    "pillow",
+    "pytesseract",
+    "python-Levenshtein",
+    "regex",
+    "scikit-image",
+    "scikit-learn",
+    "wheel",
+]
 
 [project.optional-dependencies]
 # Additional groups of dependencies (e.g. development dependencies). 
@@ -64,8 +85,11 @@ maintainers = [
 #
 # Optional or "extra" dependencies the project provides. See:
 # https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras
-#dev = ["check-manifest"]
-#test = ["coverage"]
+dev = [
+    "bandit[toml]",
+    "pytest",
+    "ruff",
+]
 
 # Configurations for the tools used in project
 [tool.ruff]
