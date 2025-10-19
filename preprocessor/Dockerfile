@@ -1,12 +1,17 @@
-# Stage 1: Build NVIDIA CUDA on Ubuntu with Python and uv as base image
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS base
+# Stage 1: Paddle's GPU image with CUDA 11.8 + cuDNN 8.9 + PaddlePaddle 3.2 + Python 3.10 as base image
+FROM paddlepaddle/paddle:3.2.0-gpu-cuda11.8-cudnn8.9 AS base
 
 # Install local dependencies, do cleanup
 RUN apt-get update && apt-get install -y \
     git curl \
+    python3.10-venv \
     ffmpeg libsm6 libxext6  \
     tesseract-ocr poppler-utils \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Update pip and install uv
+RUN pip install --no-input --upgrade pip \
+    && pip install --no-input uv
 
 # Stage 2: Build runtime image
 FROM base AS runtime
@@ -22,7 +27,11 @@ RUN chmod +x ./entrypoint.sh
 # Copy application code
 COPY src ./src
 
-# Install dependencies
+# Create a venv with the systems Python which can access Paddle
+RUN python3 -m venv --system-site-packages .venv \
+    && ./.venv/bin/python -m pip install --no-input --upgrade pip
+
+# Install dependencies in venv
 RUN uv lock && uv sync --frozen --no-dev
 
 # Expose PP_PORT to access from outside
@@ -33,7 +42,6 @@ ENV PP_PORT=${PP_PORT}
 
 # Env vars for CUDA
 ENV CUDA_VISIBLE_DEVICES=${GPU_ID}
-ENV LD_LIBRARY_PATH=/app/.venv/lib/python3.11/site-packages/nvidia/cudnn/lib
 
 # Run the gunicorn server at entry
 ENTRYPOINT ["/app/entrypoint.sh"]

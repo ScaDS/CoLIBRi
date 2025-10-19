@@ -5,7 +5,7 @@
 # Choosing a build backend:
 # https://packaging.python.org/en/latest/tutorials/packaging-projects/#choosing-a-build-backend
 # A list of packages that are needed to build the project package:
-requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+requires = ["setuptools", "wheel"]  # REQUIRED if [build-system] table is used
 # The name of the Python object that frontends will use to perform the build:
 build-backend = "setuptools.build_meta"
 
@@ -30,7 +30,7 @@ readme = "README.md"
 # Specify which Python versions are supported. 'pip install' will check this
 # and refuse to install the project if the version does not match:
 # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-requires-python = ">=3.11"
+requires-python = ">=3.10,<3.11"
 
 # This is either text indicating the license for distribution, or a license file.
 # https://packaging.python.org/en/latest/specifications/core-metadata/#license
@@ -66,7 +66,6 @@ dependencies = [
     "numpy",
     "opencv-python",
     "paddleocr",
-    "paddlepaddle-gpu @ https://paddle-whl.bj.bcebos.com/stable/cu129/paddlepaddle-gpu/paddlepaddle_gpu-3.2.0-cp311-cp311-linux_x86_64.whl",
     "pandas",
     "pdf2image",
     "pillow",
@@ -100,7 +99,7 @@ torchvision = { index = "pytorch" }
 
 [[tool.uv.index]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu129"
+url = "https://download.pytorch.org/whl/cu118"
 explicit = true  # prevent packages from being installed from that index unless explicitly pinned to it
 
 # Configurations for the tools used in project
