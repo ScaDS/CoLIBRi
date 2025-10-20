@@ -15,6 +15,12 @@ Select the appropriate Dockerfile for your available NVIDIA GPU, which needs to 
   * 6.0, 6.1, 7.0 - see https://developer.nvidia.com/cuda-legacy-gpus
   * 7.5, 8.0, 8.6 - see https://developer.nvidia.com/cuda-gpus
 
+### Dockerfile.cu126
+* For CUDA 12.6 with cuDNN 9.5
+* Built based on [paddlepaddle Docker image](https://hub.docker.com/r/paddlepaddle/paddle) tagged "3.2.0-gpu-cuda12.6-cudnn9.5"
+* Covers GPU architectures according to CUDA compute capabilities:
+  * 12.0 - see https://developer.nvidia.com/cuda-gpus
+
 ### Dockerfile.cu129
 * For CUDA 12.9 with cuDNN 9.9
 * Built based on [paddlepaddle Docker image](https://hub.docker.com/r/paddlepaddle/paddle) tagged "3.2.0-gpu-cuda12.9-cudnn9.9"
