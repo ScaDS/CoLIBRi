@@ -9,12 +9,14 @@ Ensure that the appropriate **NVIDIA GPU driver** and **NVIDIA Container Toolkit
 Select the appropriate Dockerfile for your available NVIDIA GPU, which needs to be specified in the project's [docker-compose.yml](https://github.com/ScaDS/CoLIBRi/blob/main/docker-compose.yml#L59).
 
 ### Dockerfile.cu118
-* Built with CUDA 11.8 and cuDNN 8.9
+* For CUDA 11.8 with cuDNN 8.9
+* Built based on [paddlepaddle Docker image](https://hub.docker.com/r/paddlepaddle/paddle) tagged "3.2.0-gpu-cuda11.8-cudnn8.9"
 * Covers GPU architectures according to CUDA compute capabilities:
   * 6.0, 6.1, 7.0 - see https://developer.nvidia.com/cuda-legacy-gpus
   * 7.5, 8.0, 8.6 - see https://developer.nvidia.com/cuda-gpus
 
 ### Dockerfile.cu129
-* Built with CUDA 12.9 and cuDNN 9.9
+* For CUDA 12.9 with cuDNN 9.9
+* Built based on [paddlepaddle Docker image](https://hub.docker.com/r/paddlepaddle/paddle) tagged "3.2.0-gpu-cuda12.9-cudnn9.9"
 * Covers GPU architectures according to CUDA compute capabilities:
   * 12.0 - see https://developer.nvidia.com/cuda-gpus
