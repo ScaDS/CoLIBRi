@@ -5,7 +5,7 @@
 # Choosing a build backend:
 # https://packaging.python.org/en/latest/tutorials/packaging-projects/#choosing-a-build-backend
 # A list of packages that are needed to build the project package:
-requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+requires = ["setuptools", "wheel"]  # REQUIRED if [build-system] table is used
 # The name of the Python object that frontends will use to perform the build:
 build-backend = "setuptools.build_meta"
 
@@ -13,24 +13,24 @@ build-backend = "setuptools.build_meta"
 # This is the name of the project. The first time you publish this
 # package, this name will be registered for you. Restrictions:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "preprocessor"
+name = "CoLIBRi-preprocessor"
 
 # Versions should comply with PEP 440
 version = "0.0.1"
 
 # This is a one-line description of what the project does:
 # https://packaging.python.org/specifications/core-metadata/#summary
-description = "Preprocessor microservice within the prototype app"
+description = "Preprocessor microservice of CoLIBRi"
 
 # This is an optional longer description of the project.
 # Often, the same as the README, corresponds to:
 # https://packaging.python.org/specifications/core-metadata/#description-optional
-#readme = "README.md"
+readme = "README.md"
 
 # Specify which Python versions are supported. 'pip install' will check this
 # and refuse to install the project if the version does not match:
 # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-requires-python = ">=3.11"
+requires-python = ">=3.10,<3.11"
 
 # This is either text indicating the license for distribution, or a license file.
 # https://packaging.python.org/en/latest/specifications/core-metadata/#license
@@ -38,23 +38,46 @@ requires-python = ">=3.11"
 
 # Names of the persons or organization who originally authored the project.
 authors = [
-  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
-  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
-  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+    {name = "Lucas Peter", email = "lucas.peter@uni-leipzig.de" },
+    {name = "Jacob Pollack", email = "jacob.pollack@uni-leipzig.de" },
+    {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" },
 ]
 
 # Names of the persons or organization who currently maintain the project.
 maintainers = [
-  {name = "Lucas Peter", email = "peter@informatik.uni-leipzig.de" },
-  {name = "Jacob Pollack", email = "pollack@informatik.uni-leipzig.de" },
-  {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" }
+    {name = "Lucas Peter", email = "lucas.peter@uni-leipzig.de" },
+    {name = "Jacob Pollack", email = "jacob.pollack@uni-leipzig.de" },
+    {name = "Matthias Taeschner", email = "matthias.taeschner@uni-leipzig.de" },
 ]
 
 # Other packages that the project depends on to run.
 # Any package you put here will be installed by pip when your project is
 # installed, so they must be valid existing projects. See:
 # https://packaging.python.org/discussions/install-requires-vs-requirements/
-#dependencies = [ "some-dependency" ]
+dependencies = [
+    "clip @ git+https://github.com/openai/CLIP.git",
+    "flask",
+    "flask-restful",
+    "fuzzysearch",
+    "fuzzywuzzy",
+    "gunicorn",
+    "joblib",
+    "nnunetv2",
+    "numpy",
+    "opencv-python",
+    "paddleocr",
+    "pandas",
+    "pdf2image",
+    "pillow",
+    "pytesseract",
+    "python-Levenshtein",
+    "regex",
+    "scikit-image",
+    "scikit-learn",
+    "torch",
+    "torchvision",
+    "wheel",
+]
 
 [project.optional-dependencies]
 # Additional groups of dependencies (e.g. development dependencies). 
@@ -64,8 +87,16 @@ maintainers = [
 #
 # Optional or "extra" dependencies the project provides. See:
 # https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras
-#dev = ["check-manifest"]
-#test = ["coverage"]
+dev = [
+    "bandit[toml]",
+    "pytest",
+    "ruff",
+]
+
+[tool.uv.sources]
+# Index pytorch will be defined via env var in Dockerfiles
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
 
 # Configurations for the tools used in project
 [tool.ruff]
@@ -101,7 +132,7 @@ exclude = [
 line-length = 120
 indent-width = 4
 # Target Python version
-target-version = "py311"
+target-version = "py310"
 # Enumerate all fixed violations.
 show-fixes = true
 # Group violations by containing file.

@@ -1,10 +1,10 @@
-CREATE USER cpt_db_user WITH ENCRYPTED PASSWORD 'SCRAM-SHA-256$4096:zWf3siLwItDqYkWHawZNeQ==$oqXFDgsYmtCs+4zzymxb8jCyoOszjChGfjIa3B/rH4M=:wABoXahd6SPk/doIJnOj70YD8o0gBk68z5UMuMJ946w=';
-CREATE DATABASE cpt_db;
-GRANT ALL PRIVILEGES ON DATABASE cpt_db TO cpt_db_user;
-\c cpt_db db_admin
-GRANT ALL ON SCHEMA public TO cpt_db_user;
-GRANT pg_read_server_files TO cpt_db_user;
-\c cpt_db cpt_db_user
+CREATE USER app_db_user WITH ENCRYPTED PASSWORD 'SCRAM-SHA-256$4096:zWf3siLwItDqYkWHawZNeQ==$oqXFDgsYmtCs+4zzymxb8jCyoOszjChGfjIa3B/rH4M=:wABoXahd6SPk/doIJnOj70YD8o0gBk68z5UMuMJ946w=';
+CREATE DATABASE app_db;
+GRANT ALL PRIVILEGES ON DATABASE app_db TO app_db_user;
+\c app_db db_admin
+GRANT ALL ON SCHEMA public TO app_db_user;
+GRANT pg_read_server_files TO app_db_user;
+\c app_db app_db_user
 
 CREATE TEMP TABLE drawings_staging (
     drawing_id INTEGER PRIMARY KEY,
