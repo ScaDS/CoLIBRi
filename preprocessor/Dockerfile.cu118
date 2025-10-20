@@ -31,9 +31,11 @@ COPY src ./src
 RUN python3 -m venv --system-site-packages .venv \
     && ./.venv/bin/python -m pip install --no-input --upgrade pip
 
+# Define index for pytorch CUDA 11.8 wheel
+ENV UV_INDEX=pytorch=https://download.pytorch.org/whl/cu118
+
 # Install dependencies in venv
-RUN uv lock --extra cu118 \
-    && uv sync --frozen --no-dev --extra cu118
+RUN uv lock && uv sync --frozen --no-dev
 
 # Expose PP_PORT to access from outside
 EXPOSE ${PP_PORT}
