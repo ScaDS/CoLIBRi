@@ -2,7 +2,7 @@
 
 ## GPU and CUDA
 
-An NVIDIA GPU is required to run this preprocessing service.
+An NVIDIA GPU is required to run this preprocessing service. The GPU should support at least CUDA 6.0 compute capabilities (see https://developer.nvidia.com/cuda-legacy-gpus). We recommend at least 10GB VRAM.
 
 Ensure that the appropriate **NVIDIA GPU driver** and **NVIDIA Container Toolkit** are installed on your system, like desribed [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
