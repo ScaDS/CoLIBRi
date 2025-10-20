@@ -1,0 +1,67 @@
+------------------------------------------------------------------------
+The MIT License (MIT)
+License:
+- https://opensource.org/licenses/mit-license.html
+Applies to:
+- CLIP (https://github.com/openai/CLIP)
+- dash (https://pypi.org/project/dash/)
+- dash-chat (https://pypi.org/project/dash-chat/)
+- fuzzysearch (https://pypi.org/project/fuzzysearch/)
+- gunicorn (https://pypi.org/project/gunicorn/)
+- pdf2image (https://pypi.org/project/pdf2image/)
+- pillow (https://pypi.org/project/pillow/)
+- pytest (https://pypi.org/project/pytest/)
+- ruff (https://pypi.org/project/ruff/)
+- wheel (https://pypi.org/project/wheel/)
+
+------------------------------------------------------------------------
+Apache License 2.0
+License:
+- http://www.apache.org/licenses/LICENSE-2.0
+Applies to:
+- bandit (https://pypi.org/project/bandit/)
+- dash-bootstrap-components (https://pypi.org/project/dash-bootstrap-components/)
+- Gradle (https://github.com/gradle/gradle)
+- nnU-Net (https://pypi.org/project/nnunetv2/)
+- opencv-python (https://pypi.org/project/opencv-python/)
+- paddleocr (https://pypi.org/project/paddleocr/)
+- PaddlePaddle (https://hub.docker.com/r/paddlepaddle/paddle)
+- pytesseract (https://pypi.org/project/pytesseract/)
+- regex (https://pypi.org/project/regex/)
+- requests (https://pypi.org/project/requests/)
+- Spring-Boot (https://github.com/spring-projects/spring-boot)
+
+------------------------------------------------------------------------
+BSD-3-Clause
+License:
+- https://opensource.org/license/bsd-3-clause
+Applies to:
+- Flask (https://pypi.org/project/Flask/)
+- Flask-RESTful (https://pypi.org/project/Flask-RESTful/)
+- joblib (https://pypi.org/project/joblib/)
+- pandas (https://pypi.org/project/pandas/)
+- python-dotenv (https://pypi.org/project/python-dotenv/)
+- scikit-image (https://pypi.org/project/scikit-image/)
+- scikit-learn (https://pypi.org/project/scikit-learn/)
+
+------------------------------------------------------------------------
+GNU General Public License v2
+License:
+- https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Applies to:
+- fuzzywuzzy (https://pypi.org/project/fuzzywuzzy/)
+- python-Levenshtein (https://pypi.org/project/python-Levenshtein/)
+
+------------------------------------------------------------------------
+The PostgreSQL License
+License:
+- https://opensource.org/license/postgresql
+Applies to:
+- PostgreSQL (https://www.postgresql.org/)
+
+------------------------------------------------------------------------
+NumPy License
+License:
+- https://numpy.org/doc/stable/license.html
+Applies to:
+- NumPy (https://pypi.org/project/numpy/)
