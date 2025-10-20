@@ -32,7 +32,8 @@ RUN python3 -m venv --system-site-packages .venv \
     && ./.venv/bin/python -m pip install --no-input --upgrade pip
 
 # Install dependencies in venv
-RUN uv lock && uv sync --frozen --no-dev
+RUN uv lock --extra cu118
+    && uv sync --frozen --no-dev --extra cu118
 
 # Expose PP_PORT to access from outside
 EXPOSE ${PP_PORT}
