@@ -57,7 +57,6 @@ services:
       # Build container with provided Dockerfile for CUDA version
       # Refer to https://github.com/ScaDS/CoLIBRi/blob/main/preprocessor/README.md
       # Dockerfile.cu118: Built for CUDA 11.8
-      # Dockerfile.cu126: Built for CUDA 12.6
       # Dockerfile.cu129: Built for CUDA 12.9
       context: ./preprocessor
       dockerfile: Dockerfile.cu118
