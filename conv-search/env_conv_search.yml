@@ -5,39 +5,38 @@ channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - pytest
-  - flask
-  - flask-restful
-  - ruff
-  - numpy
-  - gunicorn
-  - requests
-  - pandas
-  - python-dotenv
-  - pip
-  - matplotlib
+  - pytest   # optional
+  - flask # wichtig
+  - flask-restful # wichtig
+  - ruff  # optional
+  - numpy # wichtig
+  - gunicorn # wichtig
+  - requests # wichtig
+  - pandas # doppelt
+  - python-dotenv  # doppelt
+  - pip # wichtig
+  - matplotlib  # glaube nicht benutzt
   - pip:
       - wheel
       - setuptools
-      - bandit[toml]
-      - llama-index
-      - llama-index-llms-ollama
-      - ollama
+      - bandit[toml]  # optional
+      - llama-index # wichtig
+      - llama-index-llms-ollama # wichtig
+      - ollama # wichtig
       - ipykernel
-      - llama-index-multi-modal-llms-ollama==0.4.0
-      - open_clip_torch
-      - llama-index-vector-stores-qdrant
-      - llama-index-embeddings-clip
-      - open-clip-torch
-      - git+https://github.com/openai/CLIP.git
-      - llama-index-embeddings-huggingface
-      - regex
-      - python-dotenv
-      - ijson
-      - langchain
-      - langchain-ollama
-      - langchain-openai
-      - llama-index-retrievers-bm25
-      - PyStemmer
-      - tqdm
-      - pandas
+      - llama-index-multi-modal-llms-ollama==0.4.0 # wichtig
+      - open_clip_torch # glaube nicht benutzt
+      - llama-index-vector-stores-qdrant  # ... keine ahnung wofür das ist, aber ich finde keine referenz dazu im code
+      - llama-index-embeddings-clip  # glaube nicht benutzt
+      - git+https://github.com/openai/CLIP.git  # glaube nicht benutzt
+      - llama-index-embeddings-huggingface # wichtig
+      - regex # wichtig
+      - python-dotenv # wichtig
+      - ijson  # glaube nicht benutzt
+      - langchain # wichtig
+      - langchain-ollama # wichtig
+      - langchain-openai # wichtig
+      - llama-index-retrievers-bm25 # wichtig
+      - PyStemmer # wichtig
+      - tqdm # wichtig
+      - pandas # doppelt
