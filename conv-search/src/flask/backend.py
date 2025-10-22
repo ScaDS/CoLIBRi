@@ -1,3 +1,4 @@
+import logging
 import os
 
 from chatbot_logic import convert_drawings_to_message, execute_tool_calls, get_tool_calls
@@ -6,6 +7,8 @@ from flask_restful import Api, Resource, request
 from search_engine import EmbeddingSearchEngine, RemoteEmbeddingSearchEngine
 
 from flask import Flask
+
+LOGGER = logging.getLogger(__name__)
 
 app = Flask(__name__)
 api = Api(app)
@@ -95,6 +98,7 @@ elif retrieval_method == "REMOTE":
 else:
     raise ValueError(f"Can not infer search engine type for unknown RETRIEVAL_METHOD: {retrieval_method}")
 search_engine_instance.create_index()
+LOGGER.info("Search engine created", search_engine_instance)
 
 if __name__ == "__main__":
     app.run()

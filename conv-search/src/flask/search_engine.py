@@ -12,7 +12,6 @@ from llama_index.core.vector_stores.types import VectorStoreQuery, VectorStoreQu
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from utils import get_remote_api_key, send_request_to_database
 
-
 LOGGER = logging.getLogger(__name__)
 
 class SearchEngine:
