@@ -1,29 +1,35 @@
-FROM continuumio/miniconda3:latest
+# Stage 1: Build debian-based image with python and uv as base
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS base
 
+# Install local dependencies do cleanup
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 2: Build runtime image
+FROM base AS runtime
+
+ENV PYTHONUNBUFFERED=1
 ARG CS_PORT
-
 WORKDIR /app/
-COPY env_conv_search.yml ./
+
+# Copy dependency files
+COPY pyproject.toml ./
 COPY entrypoint.sh ./
 COPY .env ./
-RUN chmod +x /app/entrypoint.sh
-COPY ./src ./src
+RUN chmod +x ./entrypoint.sh
 
-# expose port CS_PORT to access it from outside of the container
+# Generate uv lock file and install dependencies
+RUN uv lock && uv sync --frozen --no-dev
+
+# Copy application code
+COPY src ./src
+
+# Expose port
 EXPOSE ${CS_PORT}
-# Make PP_PORT available at runtime
+
+# Make CS_PORT available at runtime
 ENV CS_PORT=${CS_PORT}
-ENV PYTHONPATH=/app/
-
-# Create the environment with conda
-RUN conda env create -f /app/env_conv_search.yml
-
-# There is a bug in the LlamaIndex Ollama library, which is whywe have to replace this file with the fixed version
-# We should remove this once we upgrade to a newer version of Ollama
-COPY fixed_ollama_base.py /opt/conda/envs/conv-search-env/cpt_ms-cpt_ms-conv-search-env-env/lib/python3.1/site-packages/llama_index/multi_modal_llms/ollama/base.py
-
-ENV LD_LIBRARY_PATH=/opt/conda/envs/conv-search-env/cpt_ms-cpt_ms-conv-search-env-env/lib/
-ENV PYTHONUNBUFFERED=1
 
 # run the gunicorn server at entry
 ENTRYPOINT ["/app/entrypoint.sh"]

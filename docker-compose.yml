@@ -100,9 +100,8 @@ services:
       - app-net
 
   # Service for LLM backend
-  conv-search:
-    platform: linux/amd64
-    container_name: conv-search-app
+  convsearch-app:
+    container_name: convsearch-app
     build:
       # Build container with provided Dockerfile
       context: ./conv-search
@@ -110,16 +109,17 @@ services:
       args:
         CS_PORT: 9201
     ports:
-      - 9201:9201
+      - "9201:9201"
     restart: always
-    networks:
-      - app-net
+    depends_on:
+      - spring-app
     env_file: ./conv-search/.env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-    volumes:
-      - /opt/api_keys:/opt/api_keys  # change this to where you have stored your api keys
+      - DATABASE_HOST=spring-app:8080
+    networks:
+      - app-net
 
 # Networks
 networks:

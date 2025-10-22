@@ -1,16 +1,19 @@
-"""
-This file contains the flask backend for the chatbot.
-"""
-
+import logging
 import os
-import traceback
 
+from chatbot_logic import convert_drawings_to_message, execute_tool_calls, get_tool_calls
 from dotenv import load_dotenv
 from flask_restful import Api, Resource, request
+from search_engine import EmbeddingSearchEngine, RemoteEmbeddingSearchEngine
 
 from flask import Flask
-from src.flask.chatbot_logic import convert_drawings_to_message, execute_tool_calls, get_tool_calls
-from src.flask.search_engine import create_search_engine
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s +0000] [%(process)d] [%(levelname)s] [%(filename)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+LOGGER = logging.getLogger(__name__)
 
 app = Flask(__name__)
 api = Api(app)
@@ -27,10 +30,10 @@ class Retrieval(Resource):
         try:
             data = request.get_json()
             query = data["query"]
-            _, retrieved_drawing_ids = search_engine.retrieve_drawings(query)
+            _, retrieved_drawing_ids = search_engine_instance.retrieve_drawings(query)
             return {"results": retrieved_drawing_ids}, 200
         except Exception as e:
-            return "internal error " + str(e)
+            return {"error": "internal error " + str(e)}, 500
 
 
 class ChatbotResponse(Resource):
@@ -59,23 +62,17 @@ class ChatbotResponse(Resource):
 
         try:
             user_message_text = messages[-1]["content"]
-            drawing_message = convert_drawings_to_message(
-                technical_drawing_ids
-            )  # Message containing descriptions of 10 last retrieved drawings
-            print("getting tool calls...", flush=True)
+            drawing_message = convert_drawings_to_message(technical_drawing_ids)
             tool_calls, content = get_tool_calls(user_message_text)
-            print("executing tool calls...", flush=True)
             assistant_response, updated_technical_drawing_ids, update = execute_tool_calls(
                 tool_calls=tool_calls,
                 technical_drawing_ids=technical_drawing_ids,
                 drawings_message=drawing_message,
-                search_engine=search_engine,
+                search_engine=search_engine_instance,
             )
-            print("The assistant responded: " + str(assistant_response))
             messages.append(assistant_response)
             return {"messages": messages, "technical_drawing_ids": updated_technical_drawing_ids, "update": update}
         except Exception:
-            print(traceback.format_exc(), flush=True)
             messages.append(
                 {
                     "role": "assistant",
@@ -98,8 +95,16 @@ api.add_resource(ChatbotResponseWithDrawing, "/chatbotdrawing")
 
 load_dotenv()
 retrieval_method = os.getenv("RETRIEVAL_METHOD")
-search_engine = create_search_engine(retrieval_method)
-search_engine.create_index()
+search_engine_instance = None
+if retrieval_method == "LOCAL":
+    search_engine_instance = EmbeddingSearchEngine()
+elif retrieval_method == "REMOTE":
+    search_engine_instance = RemoteEmbeddingSearchEngine()
+else:
+    raise ValueError(f"Can not infer search engine type for unknown RETRIEVAL_METHOD: {retrieval_method}")
+search_engine_instance.create_index()
+
+LOGGER.info("Search engine and index created")
 
 if __name__ == "__main__":
     app.run()
