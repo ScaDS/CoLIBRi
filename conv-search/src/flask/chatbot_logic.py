@@ -11,10 +11,8 @@ from utils import get_remote_api_key, send_request_to_database
 def drawing_to_string(drawing_id):
     """
     Converts a drawing id into the string representation of the drawing.
-
     Args:
         drawing_id: The id of the drawing in the database
-
     Returns:
         The previously extracted text representation containing information about the drawing.
     """
@@ -26,10 +24,8 @@ def drawing_to_string(drawing_id):
 def convert_drawings_to_message(drawing_ids):
     """
     Converts a list of technical drawing ids into a chat message containing text information about the drawings.
-
     Args:
         drawing_ids : List of integers representing technical drawing ids
-
     Returns:
         A string containing descriptions of all the drawings.
     """
@@ -49,57 +45,65 @@ def convert_drawings_to_message(drawing_ids):
 
 def answer_question_about_retrieved_drawings(drawings_message, question):
     """
-    Uses an LLM to answer a sinigle question about a list of previously retrieved drawings.
-
+    Uses an LLM to answer a single question about a list of previously retrieved drawings.
     Args:
-        drawings_message: a message in the openai message format, that contains as content a text with descriptions of
-                          all 10 previously retrieved drawings.
-        queston: A string containing a question about the drawings.
-
+        drawings_message: Message in the OpenAI message format, containing text descriptions for 10 retrieved drawings.
+        question: A string containing a question about the drawings.
     Returns:
-        assistant_response: A message in the OpenAI message format containing the answer that the assistant gave to
-                            the question.
+        assistant_response: Message in the OpenAI message format containing the assistants answer.
     """
-    LLM_TYPE = os.getenv("LLM_TYPE")
+    llm_type = os.getenv("LLM_TYPE")
     messages = [
         {
             "role": "system",
-            "content": "You are an assistant for a german retrieval system on technical drawings of mechanical "
-            "components. You will be given a german list of previously retrieved drawings, and a german user"
-            " question. Your task is to answer the question in german based on the provided "
-            "retrieval results.",
+            "content": "You are an assistant for a retrieval system on technical drawings of mechanical components."
+                       "User questions and your answers will be in German." 
+                       "You will be given a list of previously retrieved drawings, and a related user question."
+                       "Your task is to answer the question based on the provided retrieval results.",
         },
         drawings_message,
-        {"role": "user", "content": question},
+        {
+            "role": "user",
+            "content": question
+        },
     ]
-    print(drawings_message, flush=True)
-    if LLM_TYPE == "ollama":
-        OLLAMA_URL = os.getenv("OLLAMA_URL")
-        LLM_MODEL = os.getenv("OLLAMA_MODEL")
-        client = Client(host=OLLAMA_URL)
+
+    assistant_message: str
+
+    if llm_type == "OLLAMA":
+        ollama_url = os.getenv("OLLAMA_URL")
+        ollama_model = os.getenv("OLLAMA_MODEL")
+        client = Client(host=ollama_url)
         response = client.chat(
-            model=LLM_MODEL,  # TODO Replace the Ollama call with a call to the ScaDS.AI LLM API
+            model=ollama_model,
             messages=messages,
         )
-        message = response["message"].content
-    elif LLM_TYPE == "remote":
+        assistant_message = response["message"].content
+    elif llm_type == "REMOTE":
         token = get_remote_api_key()
         model_name = os.getenv("REMOTE_MODEL")
         url = os.getenv("REMOTE_URL") + "/chat/completions"
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
         data = {"model": model_name, "messages": messages}
-        response = requests.post(url, headers=headers, json=data, timeout=600)
-        message = response.json()["choices"][0]["message"]["content"]
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=600)
+            response.raise_for_status() # Exception for 4xx/5xx HTML codes
+            try:
+                assistant_message = response.json()["choices"][0]["message"]["content"]
+            except Exception as e:
+                assistant_message = f"Antwort des LLM ist kein valides JSON: {e}"
+        except requests.exceptions.HTTPError as e:
+            assistant_message = f"Fehler beim Aufruf des LLM: {e}"
     else:
-        message = "Es gab einen Fehler in der internen Konfiguration. Bitte wenden Sie sich an einen Administrator."
-    assistant_response = {"role": "assistant", "content": message}
+        assistant_message = f"Fehler in der internen Konfiguration. Unbekannter Wert für LLM_TYPE: {llm_type}."
+
+    assistant_response = {"role": "assistant", "content": assistant_message}
     return assistant_response
 
 
 def answer_unrelated_question_or_message():
     """
     Respond to an unrelated question.
-
     Returns:
         assistant_response: A message in the OpenAI message format telling the user to try a different query.
     """
@@ -112,38 +116,33 @@ def answer_unrelated_question_or_message():
 
 def get_tool_calls(user_message_text):
     """
-    Uses an LLM to understand what the user asks the system to do (either perform a new search, or answer a question)
-    and creates tool calls in the OpenAi tool call format.
-
+    Uses an LLM to understand what the user asks the system to do (either perform a new search, or answer a question).
+    Creates according tool calls in the OpenAI tool call format.
     Args:
         user_message_text: The plain string text of the last message sent by the user
-
     Returns:
         tool_calls: The extracted tool calls in the OpenAI tool call format
-        content: The actual string generated by the LLM, minus the extracted tool call. If this is not empty, it means
-                that probably the tool_call was not successfully extracted. Only really needed if there is a case where
-                the LLM can decide to not call any tools, or for debugging purposes
-                So sometines the content might look like this:
-                "[TOOL_CALLS][{ "name": "answer_question_about_previous_results",
-                "arguments": {"question": "Sind in den Ergebnissen Teile aus dem Material X5CrNi18-10 dabei?"}}]"
-                In that case we could try to extract the tool calls, or just tell the user to try it again
+        content: The answer generated by the LLM, minus the extracted tool call.
     """
-    LLM_TYPE = os.getenv("LLM_TYPE")
-    if LLM_TYPE == "ollama":
-        LLM_MODEL = os.getenv("OLLAMA_MODEL")
-        OLLAMA_URL = os.getenv("OLLAMA_URL")
-        llm = ChatOllama(model=LLM_MODEL, base_url=OLLAMA_URL)
-    elif LLM_TYPE == "remote":
+    llm_type = os.getenv("LLM_TYPE")
+    if llm_type == "OLLAMA":
+        ollama_url = os.getenv("OLLAMA_URL")
+        ollama_model = os.getenv("OLLAMA_MODEL")
+        llm = ChatOllama(model=ollama_model, base_url=ollama_url)
+    elif llm_type == "REMOTE":
         remote_api_key = get_remote_api_key()
         remote_model = os.getenv("REMOTE_MODEL")
         remote_url = os.getenv("REMOTE_URL")
         llm = ChatOpenAI(model=remote_model, api_key=remote_api_key, base_url=remote_url)
+    else:
+        raise ValueError(f"Can not load LLM for unknown LLM_TYPE: {llm_type}")
 
-    # Create tool schemas and bind them to our model # TODO perhaps this should also all be in german?
-    class search_parts_german(BaseModel):
-        """Search for relevant technical drawings of mechanical components in the database based on a german query
-        provided by the user."""
-
+    # Create tool schemas and bind them to our model
+    class SearchPartsGerman(BaseModel):
+        """
+        Search for relevant technical drawings of mechanical components in the database based on a german query
+        provided by the user.
+        """
         query: str = Field(
             ...,
             description="Minimal german query to search for relevant parts. It should only include a few keywords that"
@@ -151,34 +150,36 @@ def get_tool_calls(user_message_text):
             " a specific feature has a specific value, include the feature and the value.",
         )
 
-    class answer_question_about_previous_results(BaseModel):
-        """Answer a question about the results of the previous retrieval. This will not perform a new retrieval,
-        but rather leave the results unchanged and answer a question whose answer is contained in the results of
-        the previous retrieval."""
+    class AnswerQuestionAboutPreviousResults(BaseModel):
+        """
+        Answer a question about the results of the previous retrieval. This will not perform a new retrieval,
+        but leaves the results unchanged and answer a question about the results of the retrieval.
+        """
+        question: str = Field(
+            ...,
+            description="The german question about the retrieval results to be answered."
+        )
 
-        question: str = Field(..., description="The german question about the retrieval results to be answered.")
-
-    tools = [search_parts_german, answer_question_about_previous_results]
+    tools = [SearchPartsGerman, AnswerQuestionAboutPreviousResults]
     llm_with_tools = llm.bind_tools(tools, tool_choice="any")
 
     # Invoke LLM to get tool calls
     messages = [
         {
-            "type": "system",
-            "content": "You are a helpful assistant for a retrieval system on technical drawings of mechanical "
-            "components. The user will provide queries in german, and your job is to decide whether the "
-            "user is asking to do a new search on the database, in which case you should extract an optimal"
-            " german query to use for the retrieval, "
-            "Or whether the user is asking a question about the previous retrieval results, in which case "
-            "you should just pass the question to the correct tool."
-            "You have access to a tool called search_parts_german. You will call this tool every time the "
+            "role": "system",
+            "content": "You are a helpful assistant for a retrieval system on technical drawings of mechanical components."
+            "The user will provide queries in German." 
+            "Your job is to decide whether the user is asking to do a new search on the database, in which case you "
+            "should extract an optimal german query to use for the retrieval."
+            "Or whether the user is asking a question about the previous retrieval results, in which case you should "
+            "just pass the question to the correct tool."
+            "You have access to a tool called SearchPartsGerman. You will call this tool every time the "
             "user asks to search the database."
-            "You also have access to a tool called answer_question_about_previous_results. "
-            "You will call this tool every time the user asks a question related to previous retrieval "
-            "results instead of a new retrieval search. Remember to correctly include your tool calls in "
-            "the metadata",
+            "You also have access to a tool called AnswerQuestionAboutPreviousResults. "
+            "You will call this tool every time the user asks a question related to previous retrieval results "
+            " instead of a new retrieval search. Remember to correctly include your tool calls in the metadata.",
         },
-        {"type": "user", "content": user_message_text},
+        {"role": "user", "content": user_message_text},
     ]
     # TODO here we could prepend the full message history, or append it
     #  Or maybe just use the last 5 message from the user and assistant
