@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 import requests
@@ -11,6 +12,8 @@ from llama_index.core.vector_stores.types import VectorStoreQuery, VectorStoreQu
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from utils import get_remote_api_key, send_request_to_database
 
+
+LOGGER = logging.getLogger(__name__)
 
 class SearchEngine:
     """
@@ -63,6 +66,7 @@ class SearchEngine:
                     text=d["llm_text"], embedding=d["llm_vector"], metadata={"drawing_id": d["drawing_id"]}
                 )
                 text_nodes.append(new_node)
+        LOGGER.info(f"Retrieved text nodes from database searchdata: {len(text_nodes)}")
         return text_nodes
 
     def _fetch_docs_as_image_nodes(self):
@@ -74,7 +78,7 @@ class SearchEngine:
                 # manually set the image str attribute of the ImageNode because we can't pass it in the constructor
                 node.image = d["original_drawing"]
                 image_nodes.append(node)
-
+        LOGGER.info(f"Retrieved image nodes from database searchdata: {len(image_nodes)}")
         return image_nodes
 
 
