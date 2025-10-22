@@ -1,6 +1,7 @@
 # Stage 1: Build debian-based image with python and uv as runtime
 FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS runtime
 
+ENV PYTHONUNBUFFERED=1
 ARG CS_PORT
 WORKDIR /app/
 
