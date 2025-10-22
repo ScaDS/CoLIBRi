@@ -1,6 +1,6 @@
 #!/bin/sh
-exec conda run --no-capture-output -n cpt_ms-conv-search-env gunicorn \
-  --bind "0.0.0.0:${CS_PORT}" \
+exec uv run gunicorn \
+  --bind "0.0.0.0:9201" \
   --timeout 600 \
   --chdir ./src/flask \
   backend:app
