@@ -117,7 +117,7 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - DATABASE_HOST=spring-app:7201
+      - DATABASE_HOST=spring-app:8080
     networks:
       - app-net
 

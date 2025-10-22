@@ -99,8 +99,8 @@ elif retrieval_method == "REMOTE":
 else:
     raise ValueError(f"Can not infer search engine type for unknown RETRIEVAL_METHOD: {retrieval_method}")
 search_engine_instance.create_index()
-LOGGER.info("LOGGING: Search engine created", search_engine_instance)
-print("PRINT: Search engine created", search_engine_instance, flush=True)
+
+LOGGER.info("Search engine and index created")
 
 if __name__ == "__main__":
     app.run()

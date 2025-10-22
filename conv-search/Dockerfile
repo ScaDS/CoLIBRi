@@ -1,5 +1,13 @@
-# Stage 1: Build debian-based image with python and uv as runtime
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS runtime
+# Stage 1: Build debian-based image with python and uv as base
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS base
+
+# Install local dependencies do cleanup
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Stage 2: Build runtime image
+FROM base AS runtime
 
 ENV PYTHONUNBUFFERED=1
 ARG CS_PORT

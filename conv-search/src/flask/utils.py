@@ -1,9 +1,11 @@
+import logging
 import os
 
 import requests
 from dotenv import load_dotenv
 
-# load environment file
+LOGGER = logging.getLogger(__name__)
+
 load_dotenv()
 
 
@@ -58,5 +60,6 @@ def send_request_to_database(resource, content=None, type="post"):
     :param type: post, get, or delete
     :return: json response from endpoint
     """
-    url = os.getenv("DATABASE_HOST") + resource
+    url = f'http://{os.getenv("DATABASE_HOST")}{resource}'
+    LOGGER.info(f"Connect to database host URL: {url}")
     return send_request_to(url, content, type)

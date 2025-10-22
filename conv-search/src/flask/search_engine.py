@@ -64,8 +64,7 @@ class SearchEngine:
                     text=d["llm_text"], embedding=d["llm_vector"], metadata={"drawing_id": d["drawing_id"]}
                 )
                 text_nodes.append(new_node)
-        LOGGER.info(f"LOGGING: Retrieved text nodes from database searchdata: {len(text_nodes)}")
-        print(f"PRINT: Retrieved text nodes from database searchdata: {len(text_nodes)}", flush=True)
+        LOGGER.info(f"Retrieved text nodes from database searchdata: {len(text_nodes)}")
         return text_nodes
 
     def _fetch_docs_as_image_nodes(self):
