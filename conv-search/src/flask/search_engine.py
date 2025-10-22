@@ -42,7 +42,6 @@ class SearchEngine:
             updated_technical_drawing_ids: List of 10 drawing_ids of the best retrieval results.
         """
         results = self._retrieve(query)
-        print("Retrieved the following drawings:\n" + str(results))
         updated_technical_drawing_ids = [drawing["drawing_id"] for drawing in results]
         assistant_response = {"role": "assistant", "content": "I found these drawings."}
         return assistant_response, updated_technical_drawing_ids
@@ -66,6 +65,7 @@ class SearchEngine:
                 )
                 text_nodes.append(new_node)
         LOGGER.info(f"Retrieved text nodes from database searchdata: {len(text_nodes)}")
+        print(f"Retrieved text nodes from database searchdata: {len(text_nodes)}", flush=True)
         return text_nodes
 
     def _fetch_docs_as_image_nodes(self):

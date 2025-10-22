@@ -99,6 +99,7 @@ else:
     raise ValueError(f"Can not infer search engine type for unknown RETRIEVAL_METHOD: {retrieval_method}")
 search_engine_instance.create_index()
 LOGGER.info("Search engine created", search_engine_instance)
+print("Search engine created", search_engine_instance)
 
 if __name__ == "__main__":
     app.run()
