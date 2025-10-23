@@ -537,7 +537,7 @@ def init_search_engine(dummy):
         start = datetime.now()
         search_engine = SearchEngine(dataset, ids, metric, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR])
         time_spent = datetime.now() - start
-        LOGGER.info("Time spent: ", time_spent.total_seconds())
+        LOGGER.info("Time spent: %f", time_spent.total_seconds())
         LOGGER.info("Search engine successfully initialized.")
     except Exception as e:
         LOGGER.error("Error during search engine initialization: %s", e if isinstance(e, str) else repr(e))
