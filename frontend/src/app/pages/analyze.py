@@ -519,9 +519,8 @@ def init_search_engine(dummy):
             response_data_all = send_request_to_database(resource="/searchdata/get-all", content=None, type="get")
             time_spent = datetime.now() - start
             LOGGER.info("Database request time: %s", time_spent.total_seconds())
-
     except Exception as e:
-        LOGGER.info("Error during database request: %s", e)
+        LOGGER.error("Error during database request: %s", e if isinstance(e, str) else repr(e))
         return "error"
     LOGGER.info("Database request successful.")
 
@@ -529,7 +528,6 @@ def init_search_engine(dummy):
     dataset = []
     ids = []
     for response in response_data_all:
-        LOGGER.info("Database response: %s %s", type(response), str(response))
         ids.append(response["drawing_id"])
         dataset.append(response["search_vector"])
 
@@ -542,7 +540,7 @@ def init_search_engine(dummy):
         LOGGER.info("Time spent: ", time_spent.total_seconds())
         LOGGER.info("Search engine successfully initialized.")
     except Exception as e:
-        LOGGER.info("Error during search engine initialization: %s", e)
+        LOGGER.error("Error during search engine initialization: %s", e if isinstance(e, str) else repr(e))
         return "error", [], []
     return "loaded", dataset, ids
 

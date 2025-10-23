@@ -39,7 +39,6 @@ def send_request_to(url, content, type="post"):
     if response.status_code in (200, 201):
         if type in ("get", "post"):
             try:
-                LOGGER.info("Database response: %s ", str(response.json()))
                 return response.json(), True
             except ValueError:
                 return {"ERROR": "invalid JSON in response"}
@@ -62,7 +61,11 @@ def send_request_to_database(resource, content=None, type="post"):
     """
     url = f'http://{os.getenv("DATABASE_HOST")}{resource}'
     LOGGER.info(f"Connect to database host URL: {url}")
-    return send_request_to(url, content, type)
+    response, is_ok = send_request_to(url, content, type)
+    if is_ok:
+        return response
+    else:
+        raise Exception(response)
 
 
 def send_request_to_preprocessor(resource, content=None, type="post"):
