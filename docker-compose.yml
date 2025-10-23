@@ -79,26 +79,6 @@ services:
     networks:
       - app-net
 
-  # Python application container with frontend
-  frontend-app:
-    container_name: frontend-app
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        APP_PORT: 5201
-    ports:
-      - "5201:5201"
-    restart: always
-    depends_on:
-      - spring-app
-      - preprocessor-app
-    environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-    networks:
-      - app-net
-
   # Service for LLM backend
   convsearch-app:
     container_name: convsearch-app
@@ -118,6 +98,34 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - DATABASE_HOST=spring-app:8080
+    networks:
+      - app-net
+
+  # Python application container with frontend
+  frontend-app:
+    container_name: frontend-app
+    build:
+      # Build container with provided Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        APP_PORT: 5201
+    ports:
+      - "5201:5201"
+    restart: always
+    depends_on:
+      - spring-app
+      - preprocessor-app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - DATABASE_HOST=spring-app:8080
+      - PREPROCESSOR_HOST=preprocessor-app:6201
+      - CONVSEARCH_HOST=convsearch-app:9201
+      # Path prefix for frontend deployment
+      # Provide prefix as /path, e.g. /colibri
+      # Leave empty if app is deployed at URL root /
+      - PATHNAME_PREFIX=/colibri
     networks:
       - app-net
 
