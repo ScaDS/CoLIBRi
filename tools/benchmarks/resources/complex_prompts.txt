@@ -1,0 +1,20 @@
+name,tolerance:Find Adapter with tolerances medium and normal.
+name,tolerance:Look for Anschlussstück with tolerance medium and tight.
+name,surface:Find Adapter that have Rz6.3 surfaces.
+name,surface:Show me Gehäuse with Ra3.2 roughness.
+name,thread:Find Druckstutzen that contain the thread M10x1.
+name,thread:Give me Schalterkörper with M10x1 threads.
+name,material:Find Adapter made from material X10CrNiS.
+name,material:List Druckstutzen manufactured from X5CrNi18.
+name,dimension:Show Gehäuse roughly 100 mm in any dimension.
+name,dimension:Retrieve Druckstutzen around 40 mm.
+name,gdt:Show Adapter with tolerance symbol Concentricity 0.05.
+name,gdt:Find Druckstutzen with Circular Runout 0.125.
+name,gdt:Retrieve Anschlussgehäuse with the Parallelism GDT and value 0.02.
+tolerance,thread:Look for parts that contain thread M5, but also are specified to be ISO-2768 medium and tight.
+tolerance,material:Which parts are made from material X2CrNiMo17-13-2 with tolerance class medium and normal?
+surface,thread:Show parts that have surface finish of Ra 1.6 and contain a thread like M6.
+surface,material:Retrieve parts that were made from X5CrNi18.10 and have a surface finish of Ra 3.2.
+thread,dimension:Show me parts that contain a thread M5 and are roughly 40mm in any dimension.
+material,dimension:Find components roughly 30 mm in size made of X6CrNiMoTi.
+material,gdt:Which compontens are made of X2CrNiMo17-13-2 and specify Parallelism 0.02?

@@ -1,0 +1,32 @@
+name:Find Deckel parts.
+name:Retrieve Schalterkörper.
+name:Find Adapter that were manufactured.
+name:Look for Flansch.
+name:Show me an Aufnehmer.
+tolerance:Retrieve parts that only specify ISO-2768 medium and nothing else.
+tolerance:Show parts that reference ISO-2768 medium and normal in their tolerance specification.
+tolerance:Look for parts that dont specify their general tolerances.
+tolerance:Which parts have fine and tight 2768 tolerances?
+surface:Find parts with a surface roughness of Ra 3.2.
+surface:Which parts have roughness Ra 20?
+surface:List parts that have roughness Ra 0.8.
+surface:Show parts that include a surface roughness of Ra 1.6.
+surface:Which parts reference roughness using Rz?
+thread:Which parts have M12 threads?
+thread:List parts containing thread M16.
+thread:Find parts that contain thread M5.
+thread:Show parts that include NPT threads.
+thread:Which parts have G 1/4 threads?
+material:Show me parts made of material 3.2315.
+material:Give me parts whose material is AlMgSi1.
+material:Which parts are produced from stainless steel X2CrNiMo17-13-2?
+material:Show parts that use material 1.4571.
+material:Look for parts made of X6CrNiMoTi.
+dimension:Retrieve small parts around 30 mm width.
+dimension:Which parts are similar in size to 40 mm?
+dimension:Look for parts close to 40x40mm.
+gdt:Which parts specify GD&T tolerance Concentricity 0.05?
+gdt:Show me parts where Circular Runout is specified to be 0.02.
+gdt:Retrieve parts that contain the Parallelism GDT.
+gdt:List parts that contain multiple GDT references.
+gdt:Retrieve parts without GD&T information.
