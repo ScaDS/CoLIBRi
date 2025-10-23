@@ -388,7 +388,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
         - outputDataUpload: html Div containing the table for displaying the search results
         - full_message_list: the updated full message list including the new assistant response and system prompts etc.
     """
-    print("handling chat message")
+    LOGGER.info("Handling chat message...")
     if new_message["role"] != "user":
         return clean_messages_for_chat_component(full_message_list)
     full_message_list.append(new_message)
@@ -402,7 +402,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     if update_drawings:  # if llm determined that search was carried out -> new drawings through RAG
         # Update technical_drawings and input_drawing globally
         new_drawing_ids = response["technical_drawing_ids"]
-        print("updating drawings:", new_drawing_ids)
+        LOGGER.info("Updating drawings: %s", repr(new_drawing_ids))
         technical_drawings = []
         technical_drawing_objs = []
         input_drawing = None
@@ -484,7 +484,7 @@ def update_search_engine(
     else:
         for weight in weights:
             scaled_weights.append(weight / weights_sum)
-    print("New Weights: ", scaled_weights, flush=True)
+    LOGGER.info("Set new weights: %s", repr(scaled_weights))
 
     search_engine = SearchEngine(dataset, ids, "colibri_distance", weights)
 
@@ -516,7 +516,11 @@ def init_search_engine(dummy):
                 response_data_all = json.load(f)
         else:
             start = datetime.now()
-            response_data_all = send_request_to_database(resource="/searchdata/get-all", content=None, type="get")
+            response_data_all = send_request_to_database(
+                resource="/searchdata/get-all",
+                content=None,
+                type="get"
+            )
             time_spent = datetime.now() - start
             LOGGER.info("Database request time: %s", time_spent.total_seconds())
     except Exception as e:
@@ -537,7 +541,7 @@ def init_search_engine(dummy):
         start = datetime.now()
         search_engine = SearchEngine(dataset, ids, metric, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR])
         time_spent = datetime.now() - start
-        LOGGER.info("Time spent: %f", time_spent.total_seconds())
+        LOGGER.info("Time spent: %s", time_spent.total_seconds())
         LOGGER.info("Search engine successfully initialized.")
     except Exception as e:
         LOGGER.error("Error during search engine initialization: %s", e if isinstance(e, str) else repr(e))
@@ -913,23 +917,22 @@ def update_output(content, searchengine_status, filename, source, response_data,
                 else:
                     start = datetime.now()
                     response_data = send_request_to_preprocessor(
-                        resource="/image_to_vector", content=file_data, type="post"
+                        resource="/image_to_vector",
+                        content=file_data,
+                        type="post"
                     )
                     time_spent = datetime.now() - start
-                    print("Time spent: ", time_spent.total_seconds(), flush=True)
-                    print("Complete Timings:", flush=True)
-                    print(response_data["timings"], flush=True)
-                    # json.dump(response_data, open(files(resource_dir).joinpath("example_response_data.json"), "w"))
-                print("Successfully got response from preprocessor", flush=True)
+                    LOGGER.info("Preprocessing runtime: %s", time_spent.total_seconds())
+                    LOGGER.info("Preprocessing overall times: %s", repr(response_data["timings"]))
                 input_drawing = convert_technical_drawing_to_dict(
                     convert_preprocessor_response_to_technical_drawing(response_data)
                 )
         except Exception as e:
-            print("Error during request to preprocessor: ", e, " Response data: ", response_data, flush=True)
+            LOGGER.error("Error during preprocessor request: %s", e if isinstance(e, str) else repr(e))
+            LOGGER.error("Preprocessor response: %s", repr(response_data))
             return (
                 (
-                    "Bitte versuchen Sie es erneut! Bei der Verarbeitung der Zeichnung ist ein Fehler aufgetreten.\n"
-                    + str(e)
+                    "Please try again! An unexpected error occurred during image preprocessing.\n" + str(e),
                 ),
                 "Drag and Drop oder Zeichnung Auswählen",
                 "auxButtonInactive",
@@ -942,7 +945,7 @@ def update_output(content, searchengine_status, filename, source, response_data,
 
         # extract both vectors
         try:
-            print("Querying search engine...", flush=True)
+            LOGGER.info("Querying search engine...")
             start = datetime.now()
             ocr_vector = response_data["ocr_vector"]
             shape_vector = response_data["shape_vector"]
@@ -952,13 +955,12 @@ def update_output(content, searchengine_status, filename, source, response_data,
             # query the search tree for the 10 nearest vectors
             query_result, dist = search_engine.query([search_vector], 5)
             time_spent = datetime.now() - start
-            print("Time spent: ", time_spent.total_seconds(), flush=True)
-            print("Query successful!", "Result:", query_result, dist, flush=True)
+            LOGGER.info("Search engine query runtime: %s", time_spent.total_seconds())
             # query_result = json.load(open(files(resource_dir).joinpath("example_search_result.json")))
         except Exception as e:
-            print("Error during search engine query: ", e, flush=True)
+            LOGGER.error("Error during search engine query: %s", e if isinstance(e, str) else repr(e))
             return (
-                "Please try again! An unexpected error occured during querying.\n" + str(e),
+                "Please try again! An unexpected error occurred during querying.\n" + str(e),
                 "Drag and Drop or Choose Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",

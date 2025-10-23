@@ -79,7 +79,11 @@ def send_request_to_preprocessor(resource, content=None, type="post"):
     """
     url = f'http://{os.getenv("PREPROCESSOR_HOST")}{resource}'
     LOGGER.info(f"Connect to preprocessor host URL: {url}")
-    return send_request_to(url, content, type)
+    response, is_ok = send_request_to(url, content, type)
+    if is_ok:
+        return response
+    else:
+        raise Exception(response)
 
 
 def send_request_to_llm_backend(resource, content=None, type="post"):
@@ -93,7 +97,11 @@ def send_request_to_llm_backend(resource, content=None, type="post"):
     """
     url = f'http://{os.getenv("CONVSEARCH_HOST")}{resource}'
     LOGGER.info(f"Connect to conv-search host URL: {url}")
-    return send_request_to(url, content, type)
+    response, is_ok = send_request_to(url, content, type)
+    if is_ok:
+        return response
+    else:
+        raise Exception(response)
 
 
 def get_drawing_data_for_drawing_ids(drawing_ids):
