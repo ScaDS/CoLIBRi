@@ -5,6 +5,7 @@ from datetime import datetime
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
+import requests
 from dash import MATCH, Input, Output, State, callback, callback_context, dcc, exceptions, html, register_page
 from dash_chat import ChatComponent
 
@@ -380,7 +381,36 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     full_message_list.append(new_message)
     curr_drawing_ids = [drawing_dict["drawing_id"] for drawing_dict in technical_drawings]
     content = {"messages": full_message_list, "technical_drawing_ids": curr_drawing_ids}
-    response = send_request_to_llm_backend(resource="/chatbot", method="post", payload=content)
+    try:
+        response = send_request_to_llm_backend(resource="/chatbot", method="post", payload=content)
+    except requests.exceptions.Timeout:
+        # apparently .append doesnt work here? probably need to check that
+        full_message_list = full_message_list + [{
+                "role": "assistant",
+                "content": "The connection timed out.",
+            }]
+        return (
+            # Output("chat-component", "messages"): new chat message with error
+            full_message_list,
+            # Output("uploadText", "children", allow_duplicate=True): content of the upload button
+            "Drag and Drop or Choose Drawing",
+            # clear the contents of the upload element using these two elements:
+            # Output("uploadImage", "contents", allow_duplicate=True),
+            "0"
+            # Output("uploadImage", "filename", allow_duplicate=True),
+            "0",
+            # Output("outputDataUpload", "children", allow_duplicate=True): this is where the results are displayed
+            html.Div(),  # just leave empty for now
+            # Output("full_message_list", "data"): this stores the chat messages in a dcc.store
+            full_message_list,
+            # Output("update_results_source", "data"): this stores where the last search was carried out from
+            {"source": "chat-component"},
+            # these two store drawings that are currently active/ search results in a dcc.store
+            # Output("store_input_drawing", "data", allow_duplicate=True),
+            input_drawing,
+            # Output("store_technical_drawings", "data", allow_duplicate=True),
+            technical_drawings,
+        )
     response_messages = response["messages"]
     update_drawings = response["update"]
     full_message_list = response_messages
