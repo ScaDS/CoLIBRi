@@ -6,7 +6,7 @@ services:
   # PostgreSQL database container
   database:
     container_name: database
-    image: postgres:latest
+    image: postgres:17
     ports:
       - "7211:5432"
     restart: always
@@ -54,12 +54,8 @@ services:
   preprocessor-app:
     container_name: preprocessor-app
     build:
-      # Build container with provided Dockerfile for CUDA version
-      # Refer to https://github.com/ScaDS/CoLIBRi/blob/main/preprocessor/README.md
-      # Dockerfile.cu118: Built for CUDA 11.8
-      # Dockerfile.cu129: Built for CUDA 12.9
       context: ./preprocessor
-      dockerfile: Dockerfile.cu118
+      dockerfile: ${PP_DOCKER_FILE}
       args:
         PP_PORT: 6201
         GPU_ID: 0
@@ -122,10 +118,7 @@ services:
       - DATABASE_HOST=spring-app:8080
       - PREPROCESSOR_HOST=preprocessor-app:6201
       - CONVSEARCH_HOST=convsearch-app:9201
-      # Path prefix for frontend deployment
-      # Provide prefix as /path, e.g. /colibri
-      # Leave empty if app is deployed at URL root /
-      - PATHNAME_PREFIX=/colibri
+      - PATHNAME_PREFIX=${FRONTEND_PATH}
     networks:
       - app-net
 
