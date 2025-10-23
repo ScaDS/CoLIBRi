@@ -20,19 +20,8 @@ def send_request_to_preprocessor(resource, content=None, type="post"):
     :param type: post, get, or delete
     :return: json response from endpoint
     """
-    url = "localhost:6201" + resource
-    return send_request_to(url, content, type)
-
-def send_request_to_llm_backend(resource, content=None, type="post"):
-    """
-    Sends request conv-search backennd resource and returns response json. If return status code is not 200, will return
-    dictionary with key "ERROR".
-    :param resource: the REST resource to be called, e.g. /drawing/get/1 (include leading /)
-    :param content: the payload of the request, e.g. json data for saving a drawing
-    :param type: post, get, or delete
-    :return: json response from endpoint
-    """
-    url = "localhost:9201" + resource
+    # url = "localhost:6201" + resource
+    url = "http://172.26.44.37:6101" + resource
     return send_request_to(url, content, type)
 
 
@@ -185,7 +174,7 @@ def iterate_preprocess(drawing_ids, part_numbers, drawing_paths, data_dir):
         )
         print("preprocessing result:", preprocessing_result)
 
-        llm_text, llm_vector = get_llm_examples(preprocessing_result, str(part_number))
+        llm_text, llm_vector = get_llm_examples(preprocessing_result)
 
         result_df = handle_preprocessing_result(
             preprocessing_result, drawing_id, part_number, drawing_path, "", "", "", llm_text,
@@ -319,6 +308,8 @@ def convert_to_separate_dfs(monolithic_df, result_dir):
         "outer_dimensions",
         "search_vector",
         "ocr_text",
+        "llm_text",
+        "llm_vector",
     ]
 
     for column in array_columns:
