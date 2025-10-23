@@ -138,7 +138,7 @@ def get_tool_calls(user_message_text):
         raise ValueError(f"Can not load LLM for unknown LLM_TYPE: {llm_type}")
 
     # Create tool schemas and bind them to our model
-    class SearchPartsGerman(BaseModel):
+    class search_parts_german(BaseModel):
         """
         Search for relevant technical drawings of mechanical components in the database based on a german query
         provided by the user.
@@ -150,7 +150,7 @@ def get_tool_calls(user_message_text):
             " a specific feature has a specific value, include the feature and the value.",
         )
 
-    class AnswerQuestionAboutPreviousResults(BaseModel):
+    class answer_question_about_previous_results(BaseModel):
         """
         Answer a question about the results of the previous retrieval. This will not perform a new retrieval,
         but leaves the results unchanged and answer a question about the results of the retrieval.
@@ -160,7 +160,7 @@ def get_tool_calls(user_message_text):
             description="The german question about the retrieval results to be answered."
         )
 
-    tools = [SearchPartsGerman, AnswerQuestionAboutPreviousResults]
+    tools = [search_parts_german, answer_question_about_previous_results]
     llm_with_tools = llm.bind_tools(tools, tool_choice="any")
 
     # Invoke LLM to get tool calls
@@ -216,7 +216,6 @@ def execute_tool_calls(tool_calls, drawings_message, technical_drawing_ids, sear
         fn_name = tool_call["name"]
         fn_args = tool_call["args"]
         if fn_name == "search_parts_german":
-            # assistant_response, updated_technical_drawing_ids = retrieve_drawings(**fn_args)
             assistant_response, updated_technical_drawing_ids = search_engine.retrieve_drawings(**fn_args)
             update = True
         elif fn_name == "answer_question_about_previous_results":

@@ -72,7 +72,8 @@ class ChatbotResponse(Resource):
             )
             messages.append(assistant_response)
             return {"messages": messages, "technical_drawing_ids": updated_technical_drawing_ids, "update": update}
-        except Exception:
+        except Exception as e:
+            LOGGER.error("Error while working on the Chatbot response: %s", e if isinstance(e, str) else repr(e))
             messages.append(
                 {
                     "role": "assistant",
