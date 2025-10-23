@@ -39,7 +39,7 @@ def send_request_to(url, content, type="post"):
     if response.status_code in (200, 201):
         if type in ("get", "post"):
             try:
-                LOGGER.info("Database response: %s %s", type(response.json()), str(response.json()))
+                LOGGER.info("Database response: %s ", str(response.json()))
                 return response.json(), True
             except ValueError:
                 return {"ERROR": "invalid JSON in response"}
