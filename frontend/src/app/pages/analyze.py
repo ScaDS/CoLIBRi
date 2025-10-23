@@ -1,3 +1,4 @@
+import logging
 import math
 from datetime import datetime
 
@@ -6,6 +7,8 @@ import pandas as pd
 import plotly.express as px
 from dash import MATCH, Input, Output, State, callback, callback_context, dcc, exceptions, html, register_page
 from dash_chat import ChatComponent
+
+LOGGER = logging.getLogger(__name__)
 
 from src.app.search_engine import SearchEngine
 from src.app.technical_drawing import (
@@ -506,7 +509,7 @@ def init_search_engine(dummy):
     """
     global search_engine
     # get data from database
-    print("Setting up search engine...", flush=True)
+    LOGGER.info("Setting up search engine...")
     try:
         if LOCAL_DEVELOP:
             with open(files(resource_dir).joinpath("database_response.json")) as f:
@@ -515,17 +518,18 @@ def init_search_engine(dummy):
             start = datetime.now()
             response_data_all = send_request_to_database(resource="/searchdata/get-all", content=None, type="get")
             time_spent = datetime.now() - start
-            print("Time spent: ", time_spent.total_seconds(), flush=True)
+            LOGGER.info("Database request time: %s", time_spent.total_seconds())
 
     except Exception as e:
-        print("Error during database request: ", e, flush=True)
+        LOGGER.info("Error during database request: %s", e)
         return "error"
-    print("Database connection successful.", flush=True)
+    LOGGER.info("Database request successful.")
 
     # reshape data
     dataset = []
     ids = []
     for response in response_data_all:
+        LOGGER.info("Database response: %s %s", type(response), str(response))
         ids.append(response["drawing_id"])
         dataset.append(response["search_vector"])
 
@@ -535,10 +539,10 @@ def init_search_engine(dummy):
         start = datetime.now()
         search_engine = SearchEngine(dataset, ids, metric, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR])
         time_spent = datetime.now() - start
-        print("Time spent: ", time_spent.total_seconds(), flush=True)
-        print("Search engine successfully initialized.", flush=True)
+        LOGGER.info("Time spent: ", time_spent.total_seconds())
+        LOGGER.info("Search engine successfully initialized.")
     except Exception as e:
-        print("Error during search engine initialization: ", e, flush=True)
+        LOGGER.info("Error during search engine initialization: %s", e)
         return "error", [], []
     return "loaded", dataset, ids
 
