@@ -3,7 +3,7 @@ import regex
 
 def convert_surface_string_to_ngrade(surface_string: str):
     """
-    Converts a surface string to a ngrade
+    Converts a surface string to a ngrade.
     :param surface_string: string starting with 'Ra', 'Rt', 'Rz' or 'Ry' and containing a float after
     :return: N grade number
     """
@@ -70,11 +70,8 @@ def search_for_all_occurrences_of_regex(re, text):
 def convert_preprocessor_response_to_technical_drawing(preprocessor_response):
     """
     Converts the preprocessor response into a TechnicalDrawing instance.
-    Args:
-        preprocessor_response: response object from the preprocessor service.
-
-    Returns: instance of TechnicalDrawing
-
+    :param preprocessor_response: response object from the preprocessor service.
+    :return: TechnicalDrawing instance.
     """
     # full ocr text
     full_ocr_text = preprocessor_response["ocr_text"]
@@ -126,11 +123,8 @@ def convert_preprocessor_response_to_technical_drawing(preprocessor_response):
 def convert_database_response_to_technical_drawing(response_data):
     """
     Converts the database response from the /drawing/get/{id} resource in to a TechnicalDrawing instance.
-    Args:
-        response_data: database response from the /drawing/get/{id} resource.
-
-    Returns: instance of TechnicalDrawing
-
+    :param response_data: database response from the /drawing/get/{id} resource.
+    :return: TechnicalDrawing instance.
     """
     drawing_id = response_data["drawing_id"]
 

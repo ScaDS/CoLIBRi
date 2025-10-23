@@ -26,7 +26,6 @@ LOGGER.info('Set frontend pathname prefix: %s', pathname_prefix)
 
 pathname_params = {
     "requests_pathname_prefix": pathname_prefix,
-    "assets_url_path": "/assets",
 }
 
 app = Dash(

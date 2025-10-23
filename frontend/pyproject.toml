@@ -82,6 +82,10 @@ dev = [
     "ruff",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["app", "app.pages"]
+
 # Configurations for the tools used in project
 [tool.ruff]
 # See https://docs.astral.sh/ruff/settings/#top-level for details
