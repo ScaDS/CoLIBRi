@@ -2,6 +2,20 @@ import requests
 import json
 import re
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from fuzzywuzzy import fuzz
+import traceback
+
+REMOTE_URL = "https://kiara.sc.uni-leipzig.de/api"
+REMOTE_MODEL = "vllm-llama-4-scout-17b-16e-instruct"
+REMOTE_API_KEY = "sk-0d043583220e4a78afada280fef3ed2b"
+
+EMBEDDING_METHOD = "REMOTE" # either LOCAL or REMOTE
+REMOTE_EMBED_MODEL = "vllm-multilingual-e5-large-instruct"
+LOCAL_EMBED_MODEL = "BAAI/bge-m3"
+
+with open("./resources/materials.json") as f:
+    MATERIAL_CLASSES = json.load(f)
+
 
 def extract_final_json(text):
     """
@@ -20,7 +34,8 @@ def extract_final_json(text):
     except json.JSONDecodeError:
         return ""
 
-def extract_component_combined(img_base64_encoded, ocr_text):
+
+def extract_component_combined_remote(img_base64_encoded, ocr_text):
     """Use an VLM to extract the component name (e.g. "Gewinderohr", "Schalterkörper", ...) from a drawing using the
     drawing (base64 encoded) and the already extracted OCR text.
 
@@ -33,7 +48,7 @@ def extract_component_combined(img_base64_encoded, ocr_text):
         - content: String that contains the name of the component
     """
     payload = {
-        "model": "vllm-llama-4-scout-17b-16e-instruct",
+        "model": REMOTE_MODEL,
         "messages": [
             {
                 "role": "user",
@@ -54,11 +69,9 @@ def extract_component_combined(img_base64_encoded, ocr_text):
             }
         ],
     }
-    token = "your_token"
-    url = "your_url"
-    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    headers = {"Authorization": f"Bearer {REMOTE_API_KEY}", "Content-Type": "application/json"}
     # API Request
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(REMOTE_URL, headers=headers, data=json.dumps(payload))
     if response.ok:
         content = response.json()['choices'][0]['message']['content']
         content = extract_final_json(content)
@@ -68,107 +81,144 @@ def extract_component_combined(img_base64_encoded, ocr_text):
     return content
 
 
-def construct_runtime_string(runtimes):
-    if runtimes == []:
-        runtime_string = "Es sind keine Laufzeiten für das Teil bekannt. "
-    elif len(runtimes) == 1:
-        runtime_string = (
-            "Das Teil hat die folgende Laufzeit: "
-            + str(runtimes[0]["machine_runtime"])
-            + " Minuten auf Maschine "
-            + runtimes[0]["machine"]
-            + ". "
-        )
-    else:
-        runtime_string = "Das Teil hat die folgenden Laufzeiten: "
-        for runtime in runtimes:
-            runtime_string += str(runtime["machine_runtime"]) + " Minuten auf Maschine " + runtime["machine"] + ". "
-    return runtime_string
-
-
-def construct_string_from_list(items, no_items_string, single_item_string, multiple_items_string):
+def construct_string_from_list(items, section_name):
     items = list(set(items))
     if len(items) == 0:
-        result_string = no_items_string
-    elif len(items) == 1:
-        result_string = single_item_string + items[0] + ". "
+        result_string = section_name + ": keine"
     else:
-        result_string = multiple_items_string
-        i = 0
-        while i < len(items) - 2:
-            result_string += items[i] + ", "
-            i += 1
-        result_string += items[i] + " und " + items[i + 1] + ". "
+        result_string = section_name + ": "
+        for item in items[:-1]:
+            result_string += item + ", "
+        result_string += items[-1]
+
     return result_string
 
 
+def convert_materials_to_class(materials):
+    def get_score_for_material_class(material, material_class):
+        best_score = 0
+        for comp_material in material_class:
+            ratio = fuzz.partial_ratio(material, comp_material)
+            if ratio > best_score:
+                best_score = ratio
+        return best_score
+
+    material_classes = []
+
+    for material in materials:
+        best_class_score = 0
+        best_class = None
+        for material_class in MATERIAL_CLASSES:
+            class_score = get_score_for_material_class(material, material_class)
+            if class_score > best_class_score:
+                best_class_score = class_score
+                best_class = material_class
+        if best_class_score > 0:
+            material_classes.append(best_class)
+        else:
+            material_classes.append(material)
+
+    return material_classes
+
+
 def construct_material_string(materials):
-    return construct_string_from_list(
-        materials,
-        "Die Materialien sind nicht bekannt. ",
-        "Das Teil besteht aus dem Material ",
-        "Das Teil besteht aus den Materialien ",
-    )
+    material_classes = convert_materials_to_class(materials)
+
+    material_strings = []
+    for material_class in material_classes:
+        material_strings.append(", ".join(material_class))
+
+    return construct_string_from_list(material_strings, "Material")
+
+
+def convert_tolerance_chars_to_name(tolerance: str):
+    tolerance = tolerance.lower()
+    char1 = tolerance[0]
+    char2 = tolerance[1]
+    replacements_char1 = [
+        ("f", "fine"),
+        ("m", "medium"),
+        ("c", "coarse"),
+        ("v", "very coarse"),
+    ]
+    replacements_char2 = [("h", "tight"), ("k", "normal"), ("l", "loose")]
+
+    for replacement in replacements_char1:
+        if char1 == replacement[0]:
+            char1 = replacement[1]
+            break
+
+    for replacement in replacements_char2:
+        if char2 == replacement[0]:
+            char2 = replacement[1]
+            break
+
+    return " and ".join([char1, char2])
 
 
 def construct_tolerances_string(tolerances):
-    return construct_string_from_list(
-        tolerances,
-        "Die Toleranzen nach ISO-2768 sind nicht bekannt. ",
-        "Die Toleranz nach ISO-2768 ist ",
-        "Die Toleranzen nach ISO-2768 sind ",
-    )
+    converted_tolerances = []
+    for tolerance in tolerances:
+        converted_tolerances.append(convert_tolerance_chars_to_name(tolerance))
+    return construct_string_from_list(converted_tolerances, "Toleranzen nach ISO-2768")
 
 
 def construct_surfaces_string(surfaces):
     return construct_string_from_list(
         surfaces,
-        "Die Oberflächenrauheit ist nicht bekannt. ",
-        "Das Teil besitzt eine Oberflächenrauheit von ",
-        "Das Teil besitzt Oberflächen mit Rauheit ",
+        "Oberflächenrauheit",
     )
 
 
+def convert_gdt_symbol_to_name(gdt):
+    conversions = {
+        "-": "Straightness",
+        "▱": "Flatness",
+        "◯": "Circularity",
+        # "": "Cilindricity",
+        "⌓": "Profile of a Surface",
+        "◠": "Profile of a Line",
+        "ￌ": "Perpendicularity",
+        "∠": "Angularity",
+        "//": "Parallelism",
+        "⌖": "Position",
+        "⌾": "Concentricity",
+        "=": "Symmetry",
+        "↗": "Circular Runout",
+        "⌰": "Total Runout",
+    }
+    for key, value in conversions.items():
+        gdt = gdt.replace(key, value)
+    return gdt
+
+
 def construct_gdts_string(gdts):
+    converted_gdts = []
+    for gdt in gdts:
+        converted_gdts.append(convert_gdt_symbol_to_name(gdt))
     return construct_string_from_list(
-        gdts,
-        "Die GD&T-Toleranzen sind nicht bekannt. ",
-        "Das Teil enthält die GD&T-Toleranz ",
-        "Das Teil enthält die GD&T-Toleranzen ",
+        converted_gdts,
+        "GD&T",
     )
 
 
 def construct_threads_string(threads):
-    return construct_string_from_list(
-        threads, "Das Teil enthält keine Gewinde. ", "Das Teil enthält das Gewinde ", "Das Teil enthält die Gewinde "
-    )
+    return construct_string_from_list(threads, "Gewinde")
 
 
 def construct_dimension_string(outer_dims):
     if outer_dims == []:
-        dimension_string = "Die Aussendimensionen sind nicht bekannt. "
+        dimension_string = "Keine Aussendimensionen"
     else:
         dims = [str(dim[0]) for dim in outer_dims]
-        dimension_string = (
-            "Die Aussendimensionen des Teils sind " + "x".join(dims) + " Millimeter. "
-        )
+        dimension_string = "Die Aussendimensionen des Teils sind " + "x".join(dims) + " Millimeter. "
     return dimension_string
 
 
-def drawing_to_text_using_features(preprocessing_result, extracted_name, part_number):
-    """
-    Converts response_data into a string that contains all neccessary information for the llm.
-
-    Args:
-        preprocessing_result: A dict representation of a drawing as provided by the /drawing/get database endpoint
-
-    Returns:
-        combined_drawing_string: A full text string representation/description of the drawing.
-    """
+def drawing_to_text_using_features(preprocessing_result, extracted_name):
+    part_name_string = "Name: " + extracted_name
 
     drawing_data = preprocessing_result["drawing_data"]
-
-    part_number_string = "Das Teil mit Nummer " + part_number + " ist ein/e " + extracted_name + " . "
 
     materials = drawing_data["material"]
     material_string = construct_material_string(materials)
@@ -188,28 +238,48 @@ def drawing_to_text_using_features(preprocessing_result, extracted_name, part_nu
     outer_dims = drawing_data["outer_dimensions"]
     dimension_string = construct_dimension_string(outer_dims)
 
-    combined_drawing_string = (
-        part_number_string
-        + material_string
-        + tolerances_string
-        + surfaces_string
-        + gdts_string
-        + threads_string
-        + dimension_string
+    combined_drawing_string = "\n".join(
+        [
+            part_name_string,
+            material_string,
+            tolerances_string,
+            surfaces_string,
+            gdts_string,
+            threads_string,
+            dimension_string,
+        ]
     )
-
     return combined_drawing_string
 
 
-def get_llm_examples(preprocessing_result, part_number):
-    name = extract_component_combined(preprocessing_result["original_drawing"], preprocessing_result["ocr_text"])
+def embed_using_remote(query: str):
+    payload = {
+        "model": REMOTE_EMBED_MODEL,
+        "input": query,
+    }
+    url = REMOTE_URL + "/embeddings"
+    headers = {"Authorization": f"Bearer {REMOTE_API_KEY}", "Content-Type": "application/json"}
+    # API Request
+    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=600)
+    if response.ok:
+        embedding = response.json()["data"][0]["embedding"]
+    else:
+        print(str(traceback.format_exc()))
+        embedding = []
+    return embedding
 
-    llm_text = drawing_to_text_using_features(preprocessing_result, name, part_number)
 
-    embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-m3")
-    llm_vector = embed_model.get_text_embedding(llm_text)
+def get_llm_examples(preprocessing_result):
+    name = extract_component_combined_remote(preprocessing_result["original_drawing"], preprocessing_result["ocr_text"])
 
-    # print("llm text: " + llm_text)
-    # print("llm vector: " + str(len(llm_vector)))
+    llm_text = drawing_to_text_using_features(preprocessing_result, name)
+
+    if EMBEDDING_METHOD == "REMOTE":
+        llm_vector = embed_using_remote(llm_text)
+    elif EMBEDDING_METHOD == "LOCAL":
+        embed_model = HuggingFaceEmbedding(model_name=LOCAL_EMBED_MODEL)
+        llm_vector = embed_model.get_text_embedding(llm_text)
+    else:
+        raise Exception(f"Unknown method: {EMBEDDING_METHOD}. Available methods are REMOTE, LOCAL.")
 
     return llm_text, llm_vector
