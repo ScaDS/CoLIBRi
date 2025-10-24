@@ -660,9 +660,9 @@ def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle(
-                        f"Part Nb. {int(display_data['part_number'])}"
+                        f"Part Nb. {int(float(display_data['part_number']))}"
                         if str(display_data.get("part_number", "")).strip()
-                        else "Part Nb."), className="modalHeader"),
+                        else "No Part Nb yet."), className="modalHeader"),
                     dbc.ModalBody(
                         get_inspect_modal_content(technical_drawing),
                         className="modalBody",
@@ -707,7 +707,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
         children=[
             html.Div(
                 [
-                    html.H3(f'Part Nb. {int(display_data["part_number"])}', className="tilePartNumber"),
+                    html.H3(f'Part Nb. {int(float(display_data["part_number"]))}', className="tilePartNumber"),
                     dbc.Row(
                         children=[
                             dbc.Col(
