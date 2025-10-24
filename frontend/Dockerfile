@@ -16,12 +16,11 @@ WORKDIR /app/
 COPY pyproject.toml ./
 COPY entrypoint.sh ./
 RUN chmod +x ./entrypoint.sh
+# Copy application code
+COPY src ./src
 
 # Generate uv lock file and install dependencies
 RUN uv lock && uv sync --frozen --no-dev
-
-# Copy application code
-COPY src ./src
 
 # Expose port
 EXPOSE ${APP_PORT}

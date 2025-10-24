@@ -3,5 +3,5 @@ exec uv run gunicorn \
   --bind "0.0.0.0:5201" \
   --timeout 600 \
   --chdir ./src/app \
-  app:server \
+  main:server \
   --log-level debug

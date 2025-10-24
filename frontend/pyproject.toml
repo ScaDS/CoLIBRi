@@ -25,7 +25,7 @@ description = "Microservice for the central web-application of CoLIBRi"
 # This is an optional longer description of the project.
 # Often, the same as the README, corresponds to:
 # https://packaging.python.org/specifications/core-metadata/#description-optional
-readme = "README.md"
+#readme = "README.md"
 
 # Specify which Python versions are supported. 'pip install' will check this
 # and refuse to install the project if the version does not match:
