@@ -348,7 +348,7 @@ def handle_chat_error(request_type, error, full_message_list, input_drawing, tec
     Handle exceptions raised by requests in chat interactions, e.g., requests to LLM backend, or database.
     Build an according tuple for Dash callback containing the error message in the chat messages.
     """
-    LOGGER.error(f"Error during {request_type} request: %s", error if isinstance(error, str) else repr(error))
+    LOGGER.error(f"Error for {request_type} request: %s", error if isinstance(error, str) else repr(error))
     if isinstance(error, JSONDecodeError):
         error_message = f"Error: Response from {request_type} has invalid JSON format."
     elif isinstance(error, Timeout):
