@@ -659,7 +659,7 @@ def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             ),
             dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle(display_data["part_number"]), className="modalHeader"),
+                    dbc.ModalHeader(dbc.ModalTitle(f'Part Nb. {int(display_data["part_number"])}'), className="modalHeader"),
                     dbc.ModalBody(
                         get_inspect_modal_content(technical_drawing),
                         className="modalBody",
