@@ -8,8 +8,8 @@ from sklearn.neighbors import BallTree
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
         """
-        Class encapsulating a sklearn BallTree. This search tree uses hyperspheres to recursively divide the search
-        space, similar to a kd-tree.
+        Class encapsulating a sklearn BallTree.
+        This search tree uses hyperspheres to recursively divide the search space, similar to a kd-tree.
         :param dataset: array of vectors in the search space. shape: (n_samples, n_vector_dimenions)
         :param ids: list of ids to return when searching. should be of same length as the dataset
         :param metric: should be one of BallTree.valid_metrics
@@ -34,12 +34,9 @@ class SearchEngine:
     def colibri_distance(self, v1, v2):
         """
         Computes distance between search vectors.
-        Args:
-            v1: vector 1
-            v2: vector 2
-
-        Returns: distance between v1 and v2
-
+        :param v1: vector 1
+        :param v2: vector 2
+        :return: distance between v1 and v2
         """
         v1_split = split_search_vector(v1)
         v2_split = split_search_vector(v2)
@@ -115,16 +112,14 @@ def split_search_vector(search_vector):
 
 def standardize_and_compute_l2_dist(v1, v2, means, stds):
     """
-    Standardizes the vectors v1 and v2 using the means and standard deviations (z score). Afterwards, computes
-    euclidean distances between the normalized vectors. The distance is devided by the length of the vector.
-    Args:
-        v1: vector 1
-        v2: vector 2
-        means: z score mean
-        stds: z score standard deviation
-
-    Returns: euclidian distance between v1 and v2
-
+    Standardizes the vectors v1 and v2 using the means and standard deviations (z score).
+    Afterward, computes Euclidean distances between the normalized vectors.
+    The distance is devided by the length of the vector.
+    :param v1: vector 1
+    :param v2: vector 2
+    :param means: z score mean
+    :param stds: z score standard deviation
+    :return: euclidian distance between v1 and v2
     """
     # convert to numpy arrays
     v1 = np.array(v1)
@@ -136,7 +131,7 @@ def standardize_and_compute_l2_dist(v1, v2, means, stds):
     v1_std = (v1 - means) / stds
     v2_std = (v2 - means) / stds
 
-    # euclidian distance
+    # Euclidian distance
     return distance.euclidean(v1_std, v2_std) / len(v1)
 
 
@@ -154,12 +149,9 @@ def dimension_distance(v1, v2):
     """
     Computes the best euclidean distance between two vectors by permutating the first one and computing the euclidean
     distance (normalized by vector length).
-    Args:
-        v1: vector 1
-        v2: vector 2
-
-    Returns: distance of the outer dimensions described in v1 and v2
-
+    :param v1: vector 1
+    :param v2: vector 2
+    :return: distance of the outer dimensions described in v1 and v2
     """
     # means and standard deviation for dimensions
     means = [41.90041286, 133.08905338, 0]

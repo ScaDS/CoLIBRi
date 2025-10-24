@@ -7,18 +7,17 @@ import pandas as pd
 import plotly.express as px
 from dash import MATCH, Input, Output, State, callback, callback_context, dcc, exceptions, html, register_page
 from dash_chat import ChatComponent
+from requests.exceptions import JSONDecodeError, RequestException, Timeout
 
-LOGGER = logging.getLogger(__name__)
-
-from src.app.search_engine import SearchEngine
-from src.app.technical_drawing import (
+from app.search_engine import SearchEngine
+from app.technical_drawing import (
     TechnicalDrawing,
     convert_database_response_to_technical_drawing,
     convert_dict_to_technical_drawing,
     convert_preprocessor_response_to_technical_drawing,
     convert_technical_drawing_to_dict,
 )
-from src.app.utils import (
+from app.utils import (
     convert_bytestring_to_cv2,
     get_drawing_data_for_drawing_ids,
     send_request_to_database,
@@ -26,15 +25,7 @@ from src.app.utils import (
     send_request_to_preprocessor,
 )
 
-# save time during development by caching preprocessing response
-# this will load a response file, so make sure this exists already
-LOCAL_DEVELOP = False
-
-if LOCAL_DEVELOP:
-    import json
-    from importlib.resources import files
-
-    import your_resource_dir as resource_dir  # change this as well
+LOGGER = logging.getLogger(__name__)
 
 register_page(__name__, path="/")
 
@@ -166,7 +157,7 @@ layout = dcc.Loading(
                 [
                     dcc.Upload(
                         id="uploadImage",
-                        children=[html.H3("Drag and Drop or Choose Drawing", id="uploadText")],
+                        children=[html.H3("Drag and Drop or Select Drawing", id="uploadText")],
                         multiple=False,
                     ),
                     html.Button(html.I(className="bi-filetype-pdf"), id="inspectButton", className="auxButtonInactive"),
@@ -350,12 +341,35 @@ def clean_messages_for_chat_component(messages):
     Converts a full list of messages into a list accepted by dash_chat,
     which only contains assistant and user messages (no system or tool calls messages).
     """
-    cleaned_messages = []
-    for message in messages:
-        if message["role"] == "assistant" or message["role"] == "user":
-            cleaned_messages.append(message)
-    return cleaned_messages
+    return list(filter(lambda m: m["role"] in ("assistant", "user"), messages))
 
+def handle_chat_error(request_type, error, full_message_list, input_drawing, technical_drawings):
+    """
+    Handle exceptions raised by requests in chat interactions, e.g., requests to LLM backend, or database.
+    Build an according tuple for Dash callback containing the error message in the chat messages.
+    """
+    LOGGER.error(f"Error for {request_type} request: %s", error if isinstance(error, str) else repr(error))
+    if isinstance(error, JSONDecodeError):
+        error_message = f"Error: Response from {request_type} has invalid JSON format."
+    elif isinstance(error, Timeout):
+        error_message = f"Error: The connection to the {request_type} timed out."
+    elif isinstance(error, RequestException):
+        error_message = f"Error: HTTP request to {request_type} failed with {str(error)}"
+    else:
+        error_message = f"Error: Unexpected error with {request_type}."
+
+    full_message_list.append({"role": "assistant", "content": error_message})
+    return (
+        clean_messages_for_chat_component(full_message_list),
+        "Drag and Drop or Select Drawing",
+        "0"
+        "0",
+        html.Div(),  # leave results empty for errors
+        full_message_list,
+        {"source": "chat-component"},
+        input_drawing,
+        technical_drawings,
+    )
 
 @callback(
     Output("chat-component", "messages"),
@@ -378,15 +392,21 @@ def clean_messages_for_chat_component(messages):
 def handle_chat(new_message, full_message_list, input_drawing, technical_drawings):
     """
     Handles the logic for processing a new user message.
-
-    Args:
-        - new_message: the new user message
-        - full_message_list: The previous list of all messages, including system prompts etc.
-
-    Returns:
-        - cleaned_messsages: the updated message list for the chat-component, including the assistant response
-        - outputDataUpload: html Div containing the table for displaying the search results
-        - full_message_list: the updated full message list including the new assistant response and system prompts etc.
+    :param new_message: the new user message
+    :param full_message_list: The previous list of all messages, including system prompts etc.
+    :param input_drawing: The current input drawing
+    :param technical_drawings: Result technical drawings
+    :return:
+        * **full_message_list**: messages for the chat component
+        * ***uploadText**: text for upload button
+        * **uploadImage**: contents for upload image
+        * **uploadImage**: filename for upload image
+        * **outputDataUpload**: container for result images
+        * **full_message_list**: all chat messages for Dash store
+        * **update_results_source**: source of the last search, e.g. chat-component
+        * **store_input_drawing**: current input drawing for Dash store
+        * **store_technical_drawings**: current result drawings for Dash store
+    :rtype: tuple
     """
     LOGGER.info("Handling chat message...")
     if new_message["role"] != "user":
@@ -394,23 +414,43 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     full_message_list.append(new_message)
     curr_drawing_ids = [drawing_dict["drawing_id"] for drawing_dict in technical_drawings]
     content = {"messages": full_message_list, "technical_drawing_ids": curr_drawing_ids}
-    response = send_request_to_llm_backend("/chatbot", content=content, type="post")
+    try:
+        response = send_request_to_llm_backend(resource="/chatbot", method="post", payload=content)
+    except Exception as e:
+        return handle_chat_error(
+            request_type="LLM backend",
+            error=e,
+            full_message_list=full_message_list,
+            input_drawing=input_drawing,
+            technical_drawings=technical_drawings
+        )
+
     response_messages = response["messages"]
     update_drawings = response["update"]
     full_message_list = response_messages
     cleaned_messages = clean_messages_for_chat_component(response_messages)
-    if update_drawings:  # if llm determined that search was carried out -> new drawings through RAG
-        # Update technical_drawings and input_drawing globally
-        new_drawing_ids = response["technical_drawing_ids"]
-        LOGGER.info("Updating drawings: %s", repr(new_drawing_ids))
-        technical_drawings = []
-        technical_drawing_objs = []
-        input_drawing = None
-        for drawing_id in new_drawing_ids:
-            drawing = send_request_to_database(f"/drawing/get/{drawing_id}", content=None, type="get")
-            converted_drawing_obj = convert_database_response_to_technical_drawing(drawing)
-            technical_drawing_objs.append(converted_drawing_obj)
-            technical_drawings.append(convert_technical_drawing_to_dict(converted_drawing_obj))
+    # if llm determined that search was carried out, get drawings from database
+    if update_drawings:
+        try:
+            # Update technical_drawings and input_drawing globally
+            new_drawing_ids = response["technical_drawing_ids"]
+            LOGGER.info("Updating drawings: %s", repr(new_drawing_ids))
+            technical_drawings = []
+            technical_drawing_objs = []
+            input_drawing = None
+            for drawing_id in new_drawing_ids:
+                drawing = send_request_to_database(resource=f"/drawing/get/{drawing_id}", method="get")
+                converted_drawing_obj = convert_database_response_to_technical_drawing(drawing)
+                technical_drawing_objs.append(converted_drawing_obj)
+                technical_drawings.append(convert_technical_drawing_to_dict(converted_drawing_obj))
+        except Exception as e:
+            return handle_chat_error(
+                request_type="database",
+                error=e,
+                full_message_list=full_message_list,
+                input_drawing=input_drawing,
+                technical_drawings=technical_drawings
+            )
 
     input_drawing_obj = convert_dict_to_technical_drawing(input_drawing)
     table = draw_result(
@@ -418,7 +458,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     )
     return (
         cleaned_messages,
-        "Drag and Drop or Choose Drawing",
+        "Drag and Drop or Select Drawing",
         "0",
         "0",
         html.Div(
@@ -500,49 +540,39 @@ def update_search_engine(
 def init_search_engine(dummy):
     """
      Initializes the search engine in a global variable. For this a request is made to the database to get all
-     search data vectors. Also inits the dataset
-    Args:
-        dummy: status of the dummy div. This will only change upon loading the site
-
-    Returns: "loaded" when init is done
-
+     search data vectors. Also, inits the dataset.
+    :param dummy: status of the dummy div. This will only change upon loading the site
+    :return: "loaded" when init is done
     """
     global search_engine
-    # get data from database
     LOGGER.info("Setting up search engine...")
     try:
-        if LOCAL_DEVELOP:
-            with open(files(resource_dir).joinpath("database_response.json")) as f:
-                response_data_all = json.load(f)
-        else:
-            start = datetime.now()
-            response_data_all = send_request_to_database(
-                resource="/searchdata/get-all",
-                content=None,
-                type="get"
-            )
-            time_spent = datetime.now() - start
-            LOGGER.info("Database request time: %s", time_spent.total_seconds())
+        # get data from database
+        start = datetime.now()
+        response = send_request_to_database(resource="/searchdata/get-all", method="get", payload=None)
+        time_spent = datetime.now() - start
+        LOGGER.info("Database request successful, request time: %s", time_spent.total_seconds())
     except Exception as e:
-        LOGGER.error("Error during database request: %s", e if isinstance(e, str) else repr(e))
-        return "error"
-    LOGGER.info("Database request successful.")
+        LOGGER.error("Error for database request: %s", e if isinstance(e, str) else repr(e))
+        return "error", [], []
 
     # reshape data
     dataset = []
     ids = []
-    for response in response_data_all:
-        ids.append(response["drawing_id"])
-        dataset.append(response["search_vector"])
-
-    # init the search engine using the data
-    metric = "colibri_distance"
+    for entry in response:
+        ids.append(entry["drawing_id"])
+        dataset.append(entry["search_vector"])
+    # init the search engine with retrieved data
     try:
         start = datetime.now()
-        search_engine = SearchEngine(dataset, ids, metric, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR])
+        search_engine = SearchEngine(
+            dataset=dataset,
+            ids=ids,
+            metric="colibri_distance",
+            weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR]
+        )
         time_spent = datetime.now() - start
-        LOGGER.info("Time spent: %s", time_spent.total_seconds())
-        LOGGER.info("Search engine successfully initialized.")
+        LOGGER.info("Search engine initialized. Initialization time: %s", time_spent.total_seconds())
     except Exception as e:
         LOGGER.error("Error during search engine initialization: %s", e if isinstance(e, str) else repr(e))
         return "error", [], []
@@ -629,7 +659,7 @@ def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             ),
             dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle(display_data["part_number"]), className="modalHeader"),
+                    dbc.ModalHeader(dbc.ModalTitle(f'Part Nb. {int(display_data["part_number"])}'), className="modalHeader"),
                     dbc.ModalBody(
                         get_inspect_modal_content(technical_drawing),
                         className="modalBody",
@@ -674,7 +704,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
         children=[
             html.Div(
                 [
-                    html.H3(display_data["part_number"], className="tilePartNumber"),
+                    html.H3(f'Part Nb. {int(display_data["part_number"])}', className="tilePartNumber"),
                     dbc.Row(
                         children=[
                             dbc.Col(
@@ -774,9 +804,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             ),
             # tooltips. get applied to target
             dbc.Tooltip("Material", target={"type": "material_display", "index": id}, placement="top"),
-            dbc.Tooltip(
-                "Tolerances according to ISO 2768", target={"type": "tolerance_display", "index": id}, placement="top"
-            ),
+            dbc.Tooltip("Tolerances according to ISO 2768", target={"type": "tolerance_display", "index": id}, placement="top"),
             dbc.Tooltip("Dimensions", target={"type": "dim_display", "index": id}, placement="top"),
             dbc.Tooltip("Finest Surface Finish", target={"type": "surface_display", "index": id}, placement="top"),
             dbc.Tooltip("Smallest GD&T", target={"type": "gdt_display", "index": id}, placement="top"),
@@ -893,12 +921,13 @@ def remove_output(n_clicks):
 def update_output(content, searchengine_status, filename, source, response_data, input_drawing):
     """
 
-    Args:
-        content: content of the file uploaded in an html form
-        filename: name of the file
-
-    Returns: a html.Div containing the thumbnails and a table for the search results of the given drawing
-
+    :param content: content
+    :param searchengine_status: search engine status
+    :param filename: filename
+    :param source: dash source
+    :param response_data: response data
+    :param input_drawing: input drawing
+    :return: html.Div containing the thumbnails and a table for the search results of the given drawing
     """
     # check that file is not emtpy and search engine has been initialized
     if content is not None and content != "0" and search_engine is not None:
@@ -911,30 +940,27 @@ def update_output(content, searchengine_status, filename, source, response_data,
         try:
             # only send request to the preprocessor if new image is uploaded, else use old image
             if callback_context.triggered_id == "uploadImage":
-                if LOCAL_DEVELOP:
-                    with open(files(resource_dir).joinpath("example_response_data.json")) as f:
-                        response_data = json.load(f)
-                else:
-                    start = datetime.now()
-                    response_data = send_request_to_preprocessor(
-                        resource="/image_to_vector",
-                        content=file_data,
-                        type="post"
-                    )
-                    time_spent = datetime.now() - start
-                    LOGGER.info("Preprocessing runtime: %s", time_spent.total_seconds())
-                    LOGGER.info("Preprocessing overall times: %s", repr(response_data["timings"]))
+                start = datetime.now()
+                response_data = send_request_to_preprocessor(resource="/image_to_vector", method="post", payload=file_data)
                 input_drawing = convert_technical_drawing_to_dict(
                     convert_preprocessor_response_to_technical_drawing(response_data)
                 )
+                time_spent = datetime.now() - start
+                LOGGER.info("Preprocessing successful, runtime: %s %s", time_spent.total_seconds(),
+                            repr(response_data["timings"]))
         except Exception as e:
             LOGGER.error("Error during preprocessor request: %s", e if isinstance(e, str) else repr(e))
-            LOGGER.error("Preprocessor response: %s", repr(response_data))
+            if isinstance(e, JSONDecodeError):
+                error_message = "Error: Response from preprocessor has invalid JSON format."
+            elif isinstance(e, Timeout):
+                error_message = "Error: The connection to the preprocessor timed out."
+            elif isinstance(e, RequestException):
+                error_message = f"Error: HTTP request to preprocessor failed with {str(e)}"
+            else:
+                error_message = "Error: Unexpected error with preprocessor."
             return (
-                (
-                    "Please try again! An unexpected error occurred during image preprocessing.\n" + str(e),
-                ),
-                "Drag and Drop oder Zeichnung Auswählen",
+                error_message,
+                "Drag and Drop or Select Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",
                 html.Div(),
@@ -951,17 +977,16 @@ def update_output(content, searchengine_status, filename, source, response_data,
             shape_vector = response_data["shape_vector"]
             # combine them
             search_vector = ocr_vector + shape_vector
-
-            # query the search tree for the 10 nearest vectors
+            # query the search tree for the nearest vectors
             query_result, dist = search_engine.query([search_vector], 5)
             time_spent = datetime.now() - start
             LOGGER.info("Search engine query runtime: %s", time_spent.total_seconds())
-            # query_result = json.load(open(files(resource_dir).joinpath("example_search_result.json")))
+            LOGGER.info("Search engine query result: %s %s", repr(query_result), repr(dist))
         except Exception as e:
             LOGGER.error("Error during search engine query: %s", e if isinstance(e, str) else repr(e))
             return (
                 "Please try again! An unexpected error occurred during querying.\n" + str(e),
-                "Drag and Drop or Choose Drawing",
+                "Drag and Drop or Select Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",
                 html.Div(),
@@ -1004,7 +1029,7 @@ def update_output(content, searchengine_status, filename, source, response_data,
         if searchengine_status == "loaded" or content == "0":  # initial call when loading the page
             return (
                 html.Div(),
-                "Drag and Drop or Choose Drawing",
+                "Drag and Drop or Select Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",
                 html.Div(),
@@ -1014,8 +1039,8 @@ def update_output(content, searchengine_status, filename, source, response_data,
             )
         elif search_engine is None:
             return (
-                "An Error occured during search engine initialisation. Please reload the page.",
-                "Drag and Drop or Choose Drawing",
+                "An Error occurred during search engine initialisation. Please reload the page.",
+                "Drag and Drop or Select Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",
                 html.Div(),
@@ -1026,7 +1051,7 @@ def update_output(content, searchengine_status, filename, source, response_data,
         else:
             return (
                 "The uploaded file seems to be empty. Please try again.",
-                "Drag and Drop or Choose Drawing",
+                "Drag and Drop or Select Drawing",
                 "auxButtonInactive",
                 "auxButtonInactive",
                 html.Div(),
