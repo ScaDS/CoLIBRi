@@ -54,9 +54,9 @@ def send_request(
         # Successful get and post expect JSON — raise if not valid
         try:
             return response.json()
-        except ValueError as e:
+        except requests.exceptions.JSONDecodeError as e:
             preview = response.text[:100].replace("\n", " ")
-            raise ValueError(f"Response is not valid JSON (preview: {preview!r})") from e
+            raise requests.exceptions.JSONDecodeError(f"Response is not valid JSON (preview: {preview!r})") from e
     except requests.exceptions.Timeout:
         raise
     except requests.RequestException:
