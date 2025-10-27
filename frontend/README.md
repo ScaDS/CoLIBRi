@@ -68,7 +68,7 @@ uv lock && uv sync --frozen --no-dev
 ```
 * uv will use the defined packages in `pyproject.toml` to solve the environment and install necessary packages
 
-### Running the service
+### Running the service outside of Docker
 
 After building the python environment using uv, you may use `uv run` to run any script in the virtual environment. Thus, run either
 ```
@@ -78,7 +78,7 @@ for a development server, or
 ```
 uv run gunicorn --bind "0.0.0.0:5201" --timeout 600 --chdir ./src/app main:server --log-level debug
 ```
-for a production server. You may change the port in the --bind section to fit your needs.
+for a production server. You may change the port in the --bind section to fit your needs. Make sure you also changed the pathname_prefix variable to reflect your needs, as it will not be loaded from a .env file.
 
 ### Build Service via Docker Compose as stand-alone
 **Switch to the parent directory where the file `docker-compose.yml` is located.**
