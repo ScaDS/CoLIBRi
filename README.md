@@ -2,74 +2,85 @@
 
 Supporting quotation through multi-modal retrieval and conversational search on technical drawings. 
 
+> This prototype is work in progress and provided “as is,” without warranty of any kind.
+The authors accept no responsibility for any issues, errors, or consequences resulting from its use.
 
-## Technical Specifications and Installation
+## Overview
 
-* Requirements:
-  * Docker installation
-  * GPU that supports CUDA (11.8), ~10+ GB of VRAM
-  * Make sure you firewall does not block the ports if you want to access the CoLIBRi from a remote location:
-    * 5201: Frontend
-    * 6201: Preprocessor
-    * 7201: Database
-    * 9201: LLM backend (conv-search)
-* Our Specs:
-  * Ubuntu 22.04.4 LTS
-  * Nvidia 1080ti, driver version 535.161.08
-* To run the applicaton: run ```docker compose up -d``` in the CoLIBRi directory
-  * Frontend will be hosted on ```localhost:5201```
-  * If you want to update the Database, see the tools section below
+This repository provides the application code for _CoLIBRi_ as well as sample data and other tools,
+e.g., for reproducing benchmarks.  
 
-## Components
-
-### Database Service
-
-* ToDo
+_CoLIBRi_ is based on a containerized microservice architecture with the following components:
 
 ### Frontend Service
 
-* ToDo
+**ToDo**
+
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/frontend/README.md) for more details.
 
 ### Preprocessor Service
 
-* ToDo
+**ToDo**
 
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/preprocessor/README.md) for more details.
 
 ### Conversational Search
 
-* ToDo
+**ToDo**
 
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/conv-search/README.md) for more details.
 
-## Additional Tools
+### Database Service
 
-### Initial Database Population
+Microservice to persist and access the preprocessed data for the technical drawings.
+It operates an application based on the Spring Boot Framework for REST resources, and a PostgreSQL database.
 
-The database uses a .csv file to initially read the dataset for the search. You can either generate this file yourself, 
-or generate it using the corresponding tool. For this run ````./tools/generate_database_examples.py````. If you run from
-command line, you can either parse the directory with the dataset and the output directory like this:
-```
-python3 generate_database_examples.py dataset_dir output_dir
-```
-Otherwise, you can change the values at the bottom of the python file.
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/database/README.md) for more details.
 
-### Drawing Generator
+### Tools
 
-This Generator was used to generate drawings for OCR training. You can find all the files in ```./tools/data_generator```.
-To use it, first make sure you have all the additional files required for the generation. This includes:
- * A dictionary containing all of the words that the generator picks from
- * A list of norms that the generator picks from
- * A list of materials that the generator picks from
- * A dataset of 3D models that the generator can use. We used the [MCB](https://github.com/stnoah1/mcb) dataset for this
-Change the corresponding paths at the bottom of the python file or run it using the command line.
+**ToDo**
 
-### Benchmarks
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/tools/README.md) for more details.
 
-The benchmark scripts we used for our paper are provided in ```./tools/benchmarks```.
- * ```benchmark_preprocessor.ipynb```: notebook for getting the corresponding responses from the preprocessor for a given set of drawings
- * ```evaluate_preprocessor_result.ipynb```: evaluate those reponses 
- * ```benchmark_vlm.ipynb```: run the feature extraction on a set of drawings using a VLM
- * ```evaluate_vlm_results.ipynb``` evaluate the VLM responses
- * ...
- * Other Results were generated using tools from other repos:
-   * Table I uses PaddleOCR's inbuilt eval tool
-   * Table III uses eDOCr2 eval tool
+### Example Data
+
+**ToDo**
+
+Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/example_data/README.md) for more details.
+
+## Application Setup
+
+The application and its microservices are managed within a [Docker Compose](https://docs.docker.com/compose/) stack,
+defined by the file [docker-compose.yml](https://github.com/ScaDS/CoLIBRi/blob/main/docker-compose.yml).
+
+### Basic System Requirements
+
+* The application was built on and tested for linux/amd64 (x86-64) architectures
+* Docker with Docker Compose available
+* NVIDIA GPU which supports at least CUDA 11.8, with at least 10GB of VRAM
+* The services use the following ports: 5201, 6201, 7201, 7211, 9201
+
+### Docker Compose Setup
+
+#### For configuration, two environment files are used:
+* `.env`
+  * Global configuration of CoLIBRi
+  * See [`.env.sample`](https://github.com/ScaDS/CoLIBRi/blob/main/.env.sample) for details
+* `conv-search/.env`
+  * Configuration of models and LLM backend for conversational search
+  * See [`conv-search/.env.sample`](https://github.com/ScaDS/CoLIBRi/blob/main/conv-search/.env.sample) for details
+
+#### To set up the application with Docker Compose:
+* Create the two environment files `.env` and `conv-search/.env` (see above)
+* Build the services via 
+  * `docker compose build`
+* Start the services via 
+  * `docker compose up -d`
+* Inspect the running containers via 
+  * `docker compose ps -a`
+* Inspect the logs of a specific service via 
+  * `docker compose logs -f frontend-app`
+* The frontend service is available at `http://localhost:5201`
+* Stop all running containers, fully remove according images and volumes via 
+  * `docker compose down --rmi "all" -v`
