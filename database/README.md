@@ -1,4 +1,4 @@
-# Database Microservice
+# CoLIBRi Database
 
 This directory contains the code for the database application microservice to persist and access the preprocessed data for the technical drawings.
 It operates an application based on the Spring Boot Framework for REST resources, and a PostgreSQL database.
