@@ -50,7 +50,7 @@ Select the appropriate Dockerfile for your available NVIDIA GPU, which needs to 
 
 ## Application Structure
 
-<img src="resources/architeture.png" width="1024">
+![application architecture](./resources/architeture.png)
 
 The flask endpoints for the backend are defined in `src/flask/backend.py`. 
 All logic is handled by `src/flask/preprocess.py`, which imports functions from 
