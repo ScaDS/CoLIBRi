@@ -14,19 +14,19 @@ _CoLIBRi_ is based on a containerized microservice architecture with the followi
 
 ### Frontend Service
 
-**ToDo**
+Dash App, that provides an interface to interact with the preprocessor, as well as a search engine to query historical data.
 
 Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/frontend/README.md) for more details.
 
 ### Preprocessor Service
 
-**ToDo**
+Microservice that can generate a search vector from an input mechanical drawing using OCR, shape segmentation and CLIP embedding.
 
 Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/preprocessor/README.md) for more details.
 
 ### Conversational Search
 
-**ToDo**
+Microservice, that supplies a backend for LLM and VLM tool calls, such as a search engine and the conversational interface.
 
 Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/conv-search/README.md) for more details.
 
@@ -39,13 +39,13 @@ Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/dat
 
 ### Tools
 
-**ToDo**
+Here you can find the tools we used to generate tables and some visualizations.
 
 Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/tools/README.md) for more details.
 
 ### Example Data
 
-**ToDo**
+We publish 9 drawings of 4 unique machining parts created by CPT.
 
 Please see the according [README](https://github.com/ScaDS/CoLIBRi/blob/main/example_data/README.md) for more details.
 
