@@ -59,7 +59,8 @@ Make sure they are running or run the whole docker compose stack.
 
 You may change the `FRONTEND_PATH` variable in `.env.sample` to fit to your needs. This defines the URL path prefix that Dash runs the application on.
 
-### Python Environment
+### Running the service outside of Docker
+This is possible, but not the recommended way of using the service. Using Docker will be much easier.
 
 * Make sure you have [uv](https://docs.astral.sh/uv/guides/install-python/) installed!
 * Generate a virtual environment using uv:
@@ -67,8 +68,6 @@ You may change the `FRONTEND_PATH` variable in `.env.sample` to fit to your need
 uv lock && uv sync --frozen --no-dev
 ```
 * uv will use the defined packages in `pyproject.toml` to solve the environment and install necessary packages
-
-### Running the service outside of Docker
 
 After building the python environment using uv, you may use `uv run` to run any script in the virtual environment. Thus, run either
 ```
