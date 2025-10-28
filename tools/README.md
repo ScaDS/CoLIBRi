@@ -24,10 +24,13 @@ Change the corresponding paths at the bottom of the python file or run it using 
 
 The benchmark scripts we used for our paper are provided in ```./tools/benchmarks```.
  * ```benchmark_preprocessor.ipynb```: notebook for getting the corresponding responses from the preprocessor for a given set of drawings
+   * preprocessor instance has to be running
  * ```evaluate_preprocessor_result.ipynb```: evaluate those reponses 
  * ```benchmark_vlm.ipynb```: run the feature extraction on a set of drawings using a VLM
  * ```evaluate_vlm_results.ipynb``` evaluate the VLM responses
- * ...
+ * `RAG-prompt-benchmark.ipynb`: query conv-search using prompts from `tools/resources/(complex_)prompts.txt`, calculate precison@k values. You have to label the data yourself.
+   * conv-search instance has to be running
+ * `eval_unet.ipynb`: eval the segmentation performance of the nnunet
  * Other Results were generated using tools from other repos:
    * Table I uses PaddleOCR's inbuilt eval tool
    * Table III uses eDOCr2 eval tool
