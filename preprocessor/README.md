@@ -84,7 +84,7 @@ uv lock && uv sync --frozen --no-dev
 ```
 * uv will use the defined packages in `pyproject.toml` to solve the environment and install necessary packages
 
-After building the python environment using uvmove python env section, you may use `uv run` to run any script in the virtual environment. Thus, run:
+After building the python environment using uv, you may use `uv run` to run any script in the virtual environment. Thus, run:
 ```
 uv run gunicorn --bind "0.0.0.0:6201" --timeout 600 --chdir ./src/flask backend:app
 ```
