@@ -1,7 +1,6 @@
 # CoLIBRi Preprocessor
 
-This directory contains the containerized code for the CoLIBRI frontend. In order to run properly, this service
-assumes that all other micro-services are running (Conv-Search, Database, and Preprocessor).
+This directory contains the containerized code for the CoLIBRI preprocessor microservice.
 
 ## Project Tools
 
