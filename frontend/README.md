@@ -95,3 +95,4 @@ To stop all running containers, remove the images and volumes:
 
 ### Build all Services via Docker Compose
 `docker compose up -d` will run all microservices at once. This is the recommended way to run the frontend.
+For a more detailed explanation, see the main ReadMe.md in the parent directory.
