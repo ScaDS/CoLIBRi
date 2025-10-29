@@ -71,8 +71,6 @@ To build and run only the database and Spring application microservice:
   * See the logs for any errors via `docker compose logs -f spring-app`
 * Inspect the running containers
   * `docker compose ps -a`
-* See the logs for any errors
-  * `docker compose logs -f frontend-app`
 * Stop all running containers, remove the images and volumes:
   * `docker compose down --rmi "all" -v`
 
