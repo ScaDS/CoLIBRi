@@ -6,7 +6,6 @@ Applies to:
 - CLIP (https://github.com/openai/CLIP)
 - dash (https://pypi.org/project/dash/)
 - dash-chat (https://pypi.org/project/dash-chat/)
-- fuzzysearch (https://pypi.org/project/fuzzysearch/)
 - gunicorn (https://pypi.org/project/gunicorn/)
 - langchain (https://pypi.org/project/langchain/)
 - langchain-ollama (https://pypi.org/project/langchain-ollama/)
@@ -18,6 +17,7 @@ Applies to:
 - pdf2image (https://pypi.org/project/pdf2image/)
 - pillow (https://pypi.org/project/pillow/)
 - pytest (https://pypi.org/project/pytest/)
+- rapidfuzz (https://pypi.org/project/RapidFuzz/)
 - ruff (https://pypi.org/project/ruff/)
 - wheel (https://pypi.org/project/wheel/)
 
@@ -50,14 +50,6 @@ Applies to:
 - python-dotenv (https://pypi.org/project/python-dotenv/)
 - scikit-image (https://pypi.org/project/scikit-image/)
 - scikit-learn (https://pypi.org/project/scikit-learn/)
-
----------------------------------------------------------------------------------------------------
-GNU General Public License v2
-License:
-- https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-Applies to:
-- fuzzywuzzy (https://pypi.org/project/fuzzywuzzy/)
-- python-Levenshtein (https://pypi.org/project/python-Levenshtein/)
 
 ---------------------------------------------------------------------------------------------------
 The PostgreSQL License
