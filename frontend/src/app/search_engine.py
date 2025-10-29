@@ -3,7 +3,9 @@ import itertools
 import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
+import logging
 
+LOGGER = logging.getLogger(__name__)
 
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
@@ -66,6 +68,8 @@ class SearchEngine:
             distance_functions, v1_split, v2_split, self.weights, strict=True
         ):
             distances.append(distance_function(v1_part_vector, v2_part_vector) * weight)
+
+        LOGGER.info("Distances: %s", repr(distances))
 
         return sum(distances)
 
