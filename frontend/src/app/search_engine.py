@@ -4,7 +4,6 @@ import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
 
-
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
         """
@@ -170,7 +169,7 @@ def dimension_distance(v1, v2):
 
 
 def cosine_distance_no_nans(v1, v2):
-    if sum(v1) == 0 or sum(v2) == 1.0:
+    if sum(v1) == 0.0 or sum(v2) == 0.0:
         return 0
     else:
         return distance.cosine(v1, v2)
