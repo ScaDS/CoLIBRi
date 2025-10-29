@@ -1,6 +1,6 @@
 import string
 
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 
 
 def get_numbers(text):
