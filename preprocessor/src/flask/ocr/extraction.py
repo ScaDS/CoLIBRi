@@ -3,8 +3,7 @@ import string
 from importlib.resources import files
 
 import regex
-from fuzzysearch import find_near_matches
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 
 import src.flask.ocr.resources.json as json_resource_dir
 from src.flask.ocr.utils import fuzzy_match, get_numbers
@@ -16,13 +15,16 @@ def find_position_of_din_code(text, code):
     :param code: the code to find
     :return: start, end
     """
-    match = find_near_matches(code, text, max_l_dist=1)
-    if len(match) > 0:
-        start = match[0].start
-        end = match[0].end
+    match = fuzz.partial_ratio_alignment(code, text)
+    score = match.score
+    start = match.dest_start
+    end = match.dest_end
+    match_length = end-start
+
+    if match_length > 2 and score > 80:
         return start, end
     else:
-        return 0, 0
+        return 0,0
 
 
 def get_next_n_alpha_chars(text, n):
