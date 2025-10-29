@@ -112,6 +112,7 @@ services:
     depends_on:
       - spring-app
       - preprocessor-app
+      - convsearch-app
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1

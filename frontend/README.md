@@ -1,7 +1,7 @@
 # CoLIBRi Frontend
 
-This directory contains the containerized code for the CoLIBRI frontend. In order to run properly, this service
-assumes that all other micro-services are running (Conv-Search, Database, and Preprocessor).
+This directory contains the containerized code for the _CoLIBRi_ frontend. In order to operate properly, this service
+needs all other microservices running (Preprocessor, Conv-Search, and Database).
 
 ## Project Tools
 
@@ -13,85 +13,54 @@ The following tools are used:
 * [pdf2image](https://pypi.org/project/pdf2image/)
 * [gunicorn](https://gunicorn.org/)
 
-## Repository Setup
+## Application Setup
 
 * `Dockerfile`: Dockerfile to build the Docker image for the Frontend
-* `entrypoint.sh`: Run on entry in the Docker Image
-* `pyproject.toml`: Python configuration file for the Frontend
-  * Defines Python version 
-  * Defines environment
-  * Settings for ruff and bandit
+* `entrypoint.sh`: Starts gunicorn server and frontend app in the Docker Image
+* `pyproject.toml`: Python configuration file for used dependencies and tools
 
 ## Application Structure
 
-The frontend itself is defined in `src/app/main.py`. Page contents are included in `src/app/pages/analyze.py`.
-Helper code is included in `src/app/search_engine.py` and `src/app/technical_drawing.py`.
+The frontend itself is defined in `src/app/main.py`.  
+Page contents are included in `src/app/pages/analyze.py`.  
+Helper code is provided in `src/app/search_engine.py`, `src/app/technical_drawing.py`, and `src/app/utils.py`.
 
 * `main.py`:
   * Defines pages, stylesheets (in `/assets/`) and URL prefixes
   * Runs the frontend
 
 * `analyze.py`:
-  * Defines site layout using HTML and dash components
-  * Defines callbacks for user interaction
-  * Defines data storage
+  * Defines page layout with HTML and dash components
+  * Defines callbacks for user interaction, and data storage
 
 * `search_engine.py`:
-  * class `SeachEngine` contains:
-    * custom CoLIBRi metric
-      * splits incoming vectors into blocks
-      * each block gets assigned a distance function
-      * computes weighted sum of resulting distances
-    * `__init__` builds a BallTree from a set of vectors
-    * query function that uses a query vector to get the k nearest neighbors in the BallTree
-  * Helper functions for splitting vectors and distance functions for individual blocks
+  * Defines BallTree index and custom _CoLIBRi_ distance metric
+  * Query function for retrieving the k nearest neighbors of a vector from the BallTree index
 
 * `technical_drawing.py`
-  *  class `TechnicalDrawing` contains:
-    * our internal representation for a technical drawing
-    * helper methods for getting certain characteristics such as the smallest tolerance or the smallest GD&T
-  * classes for `Surface`, `GeneralTolerance`, `GDT` and `Dimensioning` representations
+  * Internal representation and helper methods for a technical drawing
+  * Representations for `Surface`, `GeneralTolerance`, `GDT`, and `Dimensioning`
 
-## Build the Application
+## Run the Application
 
-For the frontend to work in the intended way, all backend services (Conv-Search, Database, and Preprocessor) need to be running as well.
-Make sure they are running or run the whole docker compose stack.
+For the frontend to work in the intended way, all other services (Preprocessor, Conv-Search, and Database) need to be up and running.  
+To make sure, best start the whole docker compose stack like described in the project's [`README`](../README.md#docker-compose-setup).
 
-You may change the `FRONTEND_PATH` variable in `.env.sample` to fit to your needs. This defines the URL path prefix that Dash runs the application on.
+You can change the `FRONTEND_PATH` variable in the project's `.env` to suit your needs.
+This defines the URL path prefix under which Dash runs the application, e.g. `http://host.de/colibri`
 
-### Running the service outside of Docker
-This is possible, but not the recommended way of using the service. Using Docker will be much easier.
+### Run microservice via Docker Compose as stand-alone
 
-* Make sure you have [uv](https://docs.astral.sh/uv/guides/install-python/) installed!
-* Generate a virtual environment using uv:
-```
-uv lock && uv sync --frozen --no-dev
-```
-* uv will use the defined packages in `pyproject.toml` to solve the environment and install necessary packages
-
-After building the python environment using uv, you may use `uv run` to run any script in the virtual environment. Thus, run either
-```
-uv run ./src/app/main.py
-```
-for a development server, or
-```
-uv run gunicorn --bind "0.0.0.0:5201" --timeout 600 --chdir ./src/app main:server --log-level debug
-```
-for a production server. You may change the port in the --bind section to fit your needs. Make sure you also changed the pathname_prefix variable to reflect your needs, as it will not be loaded from a .env file.
-
-### Build Service via Docker Compose as stand-alone
 **Switch to the parent directory where the file `docker-compose.yml` is located.**
 
-To build and run only the database and Spring application:
-* `docker compose build frontend-app`, to build the service
-* `docker compose up -d frontend-app` to start the frontend
-
-To inspect the running containers:
-* `docker compose ps -a`
-
-To stop all running containers, remove the images and volumes:
-* `docker compose down --rmi "all" -v`
-
-### Build all Services via Docker Compose
-`docker compose up -d` will run all microservices at once. This is the recommended way to run the frontend.
-For a more detailed explanation, see the main ReadMe.md in the parent directory.
+To build and run the frontend only:
+* Build the service
+  * `docker compose build frontend-app`
+* Start the frontend without other dependent services
+  * `docker compose up -d --no-deps frontend-app`
+* Inspect the running containers
+  * `docker compose ps -a`
+* See the logs for any errors
+  * `docker compose logs -f frontend-app`
+* Stop all running containers, remove the images and volumes:
+  * `docker compose down --rmi "all" -v`

@@ -5,7 +5,7 @@
 # Choosing a build backend:
 # https://packaging.python.org/en/latest/tutorials/packaging-projects/#choosing-a-build-backend
 # A list of packages that are needed to build the project package:
-requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+requires = ["setuptools", "wheel"]  # REQUIRED if [build-system] table is used
 # The name of the Python object that frontends will use to perform the build:
 build-backend = "setuptools.build_meta"
 
@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 # This is the name of the project. The first time you publish this
 # package, this name will be registered for you. Restrictions:
 # https://packaging.python.org/specifications/core-metadata/#name
-name = "CoLIBRi-app"
+name = "CoLIBRi-frontend"
 
 # Versions should comply with PEP 440
 version = "0.0.1"

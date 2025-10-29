@@ -1,7 +1,7 @@
 # CoLIBRi Database
 
 This directory contains the code for the database application microservice to persist and access the preprocessed data for the technical drawings.
-It operates an application based on the Spring Boot Framework for REST resources, and a PostgreSQL database.
+It runs an application based on the Spring Boot Framework for REST resources, operating on a PostgreSQL database.
 
 ## Project Tools
 
@@ -12,12 +12,12 @@ The following tools are used:
 
 ## Application Setup
 
-### Project Configuration Files
+### Configuration Files
 
+* `Dockerfile`: Dockerfile to build a Docker image for the Spring Boot application
 * `gradlew`: Gradle Wrapper script, the recommended way to execute a Gradle build  
 * `build.gradle`: Script for [Gradle build](https://docs.gradle.org/current/userguide/build_file_basics.html) configuration, tasks and plugins written in [Groovy DSL](https://docs.gradle.org/current/dsl/index.html)
 * `settings.gradle`: [Entry point](https://docs.gradle.org/current/userguide/settings_file_basics.html) to Gradle project, used to add subprojects to the build
-* `Dockerfile`: Dockerfile to build a Docker image for the Spring Boot application
 * `initdb`: Folder with SQL initialization scripts for the PostgreSQL database.  
   Scripts get executed in order, so `1_script_name` gets executed before `2_script_name`.
 * `resources`: Files loaded on database setup to populate tables with example data 
@@ -54,24 +54,27 @@ Data is handled via two concepts, also reflected by the according Java packages:
   * Act as pure data carriers without logic, best to be immutable
   * Used to transmit data between different applications, e.g. via REST
 
-### Build Microservice via Docker Compose
+### Run microservice via Docker Compose as stand-alone
 
 **Switch to the parent directory where the file `docker-compose.yml` is located.**
 
 To build and run only the database and Spring application microservice:
-* `docker compose build database spring-app`, to build the services
-* `docker compose up -d database` to start the Postgres database service
-* Wait until the database is up, running and all example tables are created
+* Build the services
+  * `docker compose build database spring-app`
+* Start the PostgreSQL database service
+  * `docker compose up -d database`
+  * Wait until the database is up, running and all example tables are created
   * See the logs for any errors via `docker compose logs -f database`
   * Wait for "LOG:  database system is ready to accept connections"
-* `docker compose up -d spring-app` to start the Spring application service
+* Start the Spring application service
+  * `docker compose up -d spring-app`
   * See the logs for any errors via `docker compose logs -f spring-app`
-
-To inspect the running containers:
-* `docker compose ps -a`
-
-To stop all running containers, and fully remove the according images and volumes:
-* `docker compose down --rmi "all" -v`
+* Inspect the running containers
+  * `docker compose ps -a`
+* See the logs for any errors
+  * `docker compose logs -f frontend-app`
+* Stop all running containers, remove the images and volumes:
+  * `docker compose down --rmi "all" -v`
 
 ### REST API documentation
 
