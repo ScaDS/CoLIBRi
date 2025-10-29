@@ -73,7 +73,7 @@ tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
 
 // Configuration of open api plugin
 openApi {
-    apiDocsUrl.set("http://localhost:7001/v3/api-docs")
+    apiDocsUrl.set("http://localhost:7201/v3/api-docs")
     outputDir.set(file("config/docs"))
 }
 // Do not build a plain jar

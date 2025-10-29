@@ -2,74 +2,77 @@
 
 Supporting quotation through multi-modal retrieval and conversational search on technical drawings. 
 
+> This prototype is work in progress and provided “as is,” without warranty of any kind.
+The authors accept no responsibility for any issues, errors, or consequences resulting from its use.
 
-## Technical Specifications and Installation
+## Overview
 
-* Requirements:
-  * Docker installation
-  * GPU that supports CUDA (11.8), ~10+ GB of VRAM
-  * Make sure you firewall does not block the ports if you want to access the CoLIBRi from a remote location:
-    * 5201: Frontend
-    * 6201: Preprocessor
-    * 7201: Database
-    * 9201: LLM backend (conv-search)
-* Our Specs:
-  * Ubuntu 22.04.4 LTS
-  * Nvidia 1080ti, driver version 535.161.08
-* To run the applicaton: run ```docker compose up -d``` in the CoLIBRi directory
-  * Frontend will be hosted on ```localhost:5201```
-  * If you want to update the Database, see the tools section below
+This repository provides the application code for _CoLIBRi_ as well as sample data and other tools,
+e.g., for reproducing benchmarks.  
 
-## Components
+_CoLIBRi_ is based on a containerized microservice architecture with the following components:
 
-### Database Service
+* **Frontend Service**
+  * Dash App, providing an interface to interact with the application.
+  * Please see the according [README](frontend/README.md) for more details.
 
-* ToDo
+* **Preprocessor Service**
+  * Microservice for generating search vectors from input mechanical drawings using OCR, shape segmentation and CLIP embedding.
+  * Please see the according [README](preprocessor/README.md) for more details.
 
-### Frontend Service
+* **Conversational Search**
+  * Microservice for LLM / VLM backend calls, used for search engine and the conversational interface.
+  * Please see the according [README](conv-search/README.md) for more details.
 
-* ToDo
+* **Database Service**
+  * Microservice to persist and access the preprocessed data for the technical drawings.
+  * Please see the according [README](database/README.md) for more details.
 
-### Preprocessor Service
+For reproducing benchmarks and plots, we provide:
 
-* ToDo
+* **Tools**
+  * Tools to reproduce benchmarks, tables and visualizations from our paper.
+  * Please see the according [README](tools/README.md) for more details.
 
+* **Example Data**
+  * We publish 9 drawings of 4 unique machining parts created by our industrie partner [CPT Präzisionstechnik GMBH](https://cptcnc.de).
+  * Please see the according [README](example_data/README.md) for more details.
 
-### Conversational Search
+## Application Setup
 
-* ToDo
+The application and its microservices are managed within a [Docker Compose](https://docs.docker.com/compose/) stack,
+defined by the file [docker-compose.yml](docker-compose.yml).
 
+### Basic System Requirements
 
-## Additional Tools
+* The application was built on and tested for linux/amd64 (x86-64) architectures
+* Docker with Docker Compose available
+* NVIDIA GPU which supports at least CUDA 11.8, with at least 10GB of VRAM
+* Recent installation of NVIDIA GPU driver and NVIDIA Container Toolkit
+* The services use the following ports: 5201, 6201, 7201, 7211, 9201
 
-### Initial Database Population
+### Docker Compose Setup
 
-The database uses a .csv file to initially read the dataset for the search. You can either generate this file yourself, 
-or generate it using the corresponding tool. For this run ````./tools/generate_database_examples.py````. If you run from
-command line, you can either parse the directory with the dataset and the output directory like this:
-```
-python3 generate_database_examples.py dataset_dir output_dir
-```
-Otherwise, you can change the values at the bottom of the python file.
+#### For configuration, two environment files are used:
 
-### Drawing Generator
+* `.env`
+  * Global configuration of _CoLIBRi_
+  * See [`.env.sample`](.env.sample) for details
+* `conv-search/.env`
+  * Configuration of models and LLM backend for conversational search
+  * See [`conv-search/.env.sample`](conv-search/.env.sample) for details
 
-This Generator was used to generate drawings for OCR training. You can find all the files in ```./tools/data_generator```.
-To use it, first make sure you have all the additional files required for the generation. This includes:
- * A dictionary containing all of the words that the generator picks from
- * A list of norms that the generator picks from
- * A list of materials that the generator picks from
- * A dataset of 3D models that the generator can use. We used the [MCB](https://github.com/stnoah1/mcb) dataset for this
-Change the corresponding paths at the bottom of the python file or run it using the command line.
+#### To set up the application with Docker Compose:
 
-### Benchmarks
-
-The benchmark scripts we used for our paper are provided in ```./tools/benchmarks```.
- * ```benchmark_preprocessor.ipynb```: notebook for getting the corresponding responses from the preprocessor for a given set of drawings
- * ```evaluate_preprocessor_result.ipynb```: evaluate those reponses 
- * ```benchmark_vlm.ipynb```: run the feature extraction on a set of drawings using a VLM
- * ```evaluate_vlm_results.ipynb``` evaluate the VLM responses
- * ...
- * Other Results were generated using tools from other repos:
-   * Table I uses PaddleOCR's inbuilt eval tool
-   * Table III uses eDOCr2 eval tool
+* Create the two environment files `.env` and `conv-search/.env` (see above)
+* Build the services via 
+  * `docker compose build`
+* Start the services via 
+  * `docker compose up -d`
+* Inspect the running containers via 
+  * `docker compose ps -a`
+* Inspect the logs of a specific service via 
+  * `docker compose logs -f frontend-app`
+* The frontend service is available at `http://localhost:5201`
+* Stop all running containers, fully remove according images and volumes via 
+  * `docker compose down --rmi "all" -v`
