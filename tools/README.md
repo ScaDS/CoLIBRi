@@ -31,6 +31,7 @@ The benchmark scripts we used for our paper are provided in ```./tools/benchmark
  * `RAG-prompt-benchmark.ipynb`: query conv-search using prompts from `tools/resources/(complex_)prompts.txt`, calculate precison@k values. You have to label the data yourself.
    * conv-search instance has to be running
  * `eval_unet.ipynb`: eval the segmentation performance of the nnunet
+ * `get_ocr_vis_for_pdf.ipynb`: generate visualization for OCR results from preprocessor
  * Other Results were generated using tools from other repos:
    * Table I uses PaddleOCR's inbuilt eval tool
    * Table III uses eDOCr2 eval tool
