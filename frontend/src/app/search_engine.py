@@ -4,8 +4,8 @@ import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
 
-import logging
-LOGGER = logging.getLogger(__name__)
+# import logging
+# LOGGER = logging.getLogger(__name__)
 
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
@@ -69,9 +69,9 @@ class SearchEngine:
         for distance_function, v1_part_vector, v2_part_vector, weight, name in zip(
             distance_functions, v1_split, v2_split, self.weights, names, strict=True
         ):
-            LOGGER.info("for %s %s was applied to %s and %s with weight %s", name, repr(distance_function), repr(v1_part_vector), repr(v2_part_vector), repr(weight))
+            # LOGGER.info("for %s %s was applied to %s and %s with weight %s", name, repr(distance_function), repr(v1_part_vector), repr(v2_part_vector), repr(weight))
             dist = distance_function(v1_part_vector, v2_part_vector) * weight
-            LOGGER.info("distance between %s is %s", repr(name), repr(dist))
+            # LOGGER.info("distance between %s is %s", repr(name), repr(dist))
             distances.append(dist)
 
 
