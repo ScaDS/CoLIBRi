@@ -45,8 +45,6 @@ services:
       # A hash of the following password is used to initialize the database
       # See file database/initdb/1_user_schema.sql
       - POSTGRES_APP_PASSWORD=qS2OwNOCZeaVqoaW6lZC
-      # Give JVM a adequate heap size, adjust -Xmx to what your machine can spare
-      - JAVA_TOOL_OPTIONS=-Xms256m -Xmx1g
     networks:
       - app-net
 

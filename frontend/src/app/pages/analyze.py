@@ -707,7 +707,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
         children=[
             html.Div(
                 [
-                    html.H3(f'Part Nb. {int(float(display_data["part_number"]))}', className="tilePartNumber"),
+                    html.H3(f'Part Nb. {display_data["part_number"]}', className="tilePartNumber"),
                     dbc.Row(
                         children=[
                             dbc.Col(
