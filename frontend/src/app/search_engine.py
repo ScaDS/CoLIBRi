@@ -73,7 +73,7 @@ class SearchEngine:
         ):
             LOGGER.info("for %s %s was applied to %s and %s with weight %s", name, repr(distance_function), repr(v1_part_vector), repr(v2_part_vector), repr(weight))
             dist = distance_function(v1_part_vector, v2_part_vector) * weight
-            LOGGER.info("distance between %s is %s", name, dist)
+            LOGGER.info("distance between %s is %s", repr(name), repr(dist))
             distances.append(dist)
 
 
