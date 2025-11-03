@@ -4,8 +4,6 @@ import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
 
-from frontend.src.app.pages.analyze import LOGGER
-
 import logging
 LOGGER = logging.getLogger(__name__)
 
