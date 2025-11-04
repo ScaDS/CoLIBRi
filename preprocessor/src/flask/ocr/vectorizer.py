@@ -118,7 +118,7 @@ def get_gdt_vector(gdts):
     Converts a list of GDT strings to a vector that includes the smallest tolerance found for each GDT class.
     """
     gdt_classes = ["⌾", "◯", "◠", "⌓", "ￌ", "↗", "⌰", "=", "//", "▱", "∠", "⌖"]
-    gdt_vector = np.zeros(len(gdt_classes))
+    gdt_vector = np.ones(len(gdt_classes))
     for gdt in gdts:
         for i, gdt_class in enumerate(gdt_classes):
             # see which gdt class each found gdt is
