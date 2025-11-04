@@ -180,6 +180,6 @@ def dimension_distance(v1, v2):
 
 def cosine_distance_no_nans(v1, v2):
     if sum(v1) == 0.0 or sum(v2) == 0.0:
-        return 0
+        return 1.0
     else:
         return distance.cosine(v1, v2)
