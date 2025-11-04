@@ -47,11 +47,11 @@ def get_tolerance_vector(tolerances):
     for tolerance in tolerances:
         # check first value in tuple equals which tol_class
         for i, tol_class in enumerate(tol_classes):
-            if tolerance[0] == tol_class:
+            if tolerance[0].lower() == tol_class:
                 tolerance_vector[i] = 1
         # check second value in tuple equals which gdt_tol_class
         for i, gdt_class in enumerate(gdt_tol_classes):
-            if tolerance[1] == gdt_class:
+            if tolerance[1].lower() == gdt_class:
                 gdt_tolerance_vector[i] = 1
 
     # combine and return
