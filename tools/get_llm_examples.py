@@ -2,7 +2,7 @@ import requests
 import json
 import re
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 import traceback
 
 REMOTE_URL = "your_url_here"
