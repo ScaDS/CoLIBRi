@@ -20,13 +20,13 @@ def convert_surface_string_to_ngrade(surface_string: str):
     if finish_type in n_grade_data:
         steps = n_grade_data[finish_type]
     else:
-        return 7  # return 7 if finish type can't be determined
+        return 15  # return 15 if finish type can't be determined
 
     # get the value of the field
     try:
         value = float(surface_string[2:].strip())
     except ValueError:
-        return 7  # return 7 as default if conversion fails
+        return 15  # return 15 as default if conversion fails
 
     # find the index value so that steps[index] <= value < steps[index+1]
     index = None
@@ -38,8 +38,8 @@ def convert_surface_string_to_ngrade(surface_string: str):
         else:  # step > value
             break
 
-    if index is None:  # return 7 as default value
-        index = 7
+    if index is None:  # return 15 as default value
+        index = 15
 
     return index
 

@@ -60,7 +60,7 @@ def get_tolerance_vector(tolerances):
 
 def convert_surface_string_to_ngrade(surface_string: str):
     """
-    Converts a surface string to a ngrade
+    Converts a surface string to a ngrade.
     :param surface_string: string starting with 'Ra', 'Rt', 'Rz' or 'Ry' and containing a float after
     :return: N grade number
     """
@@ -77,16 +77,16 @@ def convert_surface_string_to_ngrade(surface_string: str):
     if finish_type in n_grade_data:
         steps = n_grade_data[finish_type]
     else:
-        return None  # return None if finish type can't be determined
+        return 15  # return 15 if finish type can't be determined
 
     # get the value of the field
     try:
         value = float(surface_string[2:].strip())
     except ValueError:
-        return None  # return None if conversion fails
+        return 15  # return 15 as default if conversion fails
 
     # find the index value so that steps[index] <= value < steps[index+1]
-    index = None  # return None if no ngrade was matched
+    index = None
     for i, step in enumerate(steps):
         if step is None:  # grade does not exist
             continue
@@ -94,6 +94,9 @@ def convert_surface_string_to_ngrade(surface_string: str):
             index = i
         else:  # step > value
             break
+
+    if index is None:  # return 15 as default value
+        index = 15
 
     return index
 
@@ -108,7 +111,7 @@ def get_surface_vector(surfaces):
         if n_grade is not None:
             ngrades.append(n_grade)
     if len(ngrades) == 0:
-        return 7
+        return 15
     else:
         return min(ngrades)
 
