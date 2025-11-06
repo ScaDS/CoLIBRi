@@ -47,11 +47,11 @@ def get_tolerance_vector(tolerances):
     for tolerance in tolerances:
         # check first value in tuple equals which tol_class
         for i, tol_class in enumerate(tol_classes):
-            if tolerance[0] == tol_class:
+            if tolerance[0].lower() == tol_class:
                 tolerance_vector[i] = 1
         # check second value in tuple equals which gdt_tol_class
         for i, gdt_class in enumerate(gdt_tol_classes):
-            if tolerance[1] == gdt_class:
+            if tolerance[1].lower() == gdt_class:
                 gdt_tolerance_vector[i] = 1
 
     # combine and return
@@ -60,7 +60,7 @@ def get_tolerance_vector(tolerances):
 
 def convert_surface_string_to_ngrade(surface_string: str):
     """
-    Converts a surface string to a ngrade
+    Converts a surface string to a ngrade.
     :param surface_string: string starting with 'Ra', 'Rt', 'Rz' or 'Ry' and containing a float after
     :return: N grade number
     """
@@ -77,16 +77,16 @@ def convert_surface_string_to_ngrade(surface_string: str):
     if finish_type in n_grade_data:
         steps = n_grade_data[finish_type]
     else:
-        return None  # return None if finish type can't be determined
+        return 15  # return 15 if finish type can't be determined
 
     # get the value of the field
     try:
         value = float(surface_string[2:].strip())
     except ValueError:
-        return None  # return None if conversion fails
+        return 15  # return 15 as default if conversion fails
 
     # find the index value so that steps[index] <= value < steps[index+1]
-    index = None  # return None if no ngrade was matched
+    index = None
     for i, step in enumerate(steps):
         if step is None:  # grade does not exist
             continue
@@ -94,6 +94,9 @@ def convert_surface_string_to_ngrade(surface_string: str):
             index = i
         else:  # step > value
             break
+
+    if index is None:  # return 15 as default value
+        index = 15
 
     return index
 
@@ -108,7 +111,7 @@ def get_surface_vector(surfaces):
         if n_grade is not None:
             ngrades.append(n_grade)
     if len(ngrades) == 0:
-        return 7
+        return 15
     else:
         return min(ngrades)
 
@@ -118,7 +121,7 @@ def get_gdt_vector(gdts):
     Converts a list of GDT strings to a vector that includes the smallest tolerance found for each GDT class.
     """
     gdt_classes = ["⌾", "◯", "◠", "⌓", "ￌ", "↗", "⌰", "=", "//", "▱", "∠", "⌖"]
-    gdt_vector = np.zeros(len(gdt_classes))
+    gdt_vector = np.ones(len(gdt_classes))
     for gdt in gdts:
         for i, gdt_class in enumerate(gdt_classes):
             # see which gdt class each found gdt is

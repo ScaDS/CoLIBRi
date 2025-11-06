@@ -2,12 +2,12 @@ import requests
 import json
 import re
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from fuzzywuzzy import fuzz
+from rapidfuzz import fuzz
 import traceback
 
-REMOTE_URL = "https://kiara.sc.uni-leipzig.de/api"
+REMOTE_URL = "your_url_here"
 REMOTE_MODEL = "vllm-llama-4-scout-17b-16e-instruct"
-REMOTE_API_KEY = "sk-0d043583220e4a78afada280fef3ed2b"
+REMOTE_API_KEY = "your_api_key_here"
 
 EMBEDDING_METHOD = "REMOTE" # either LOCAL or REMOTE
 REMOTE_EMBED_MODEL = "vllm-multilingual-e5-large-instruct"

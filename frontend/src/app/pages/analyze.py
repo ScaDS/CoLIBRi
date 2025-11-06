@@ -512,8 +512,8 @@ def update_search_engine(
         tol_weight,
         surface_weight,
         gdt_weight,
-        dim_weight,
         norm_weight,
+        dim_weight,
         SHAPE_SCALE_FACTOR * form_weight,
     ]
     scaled_weights = []
@@ -526,7 +526,7 @@ def update_search_engine(
             scaled_weights.append(weight / weights_sum)
     LOGGER.info("Set new weights: %s", repr(scaled_weights))
 
-    search_engine = SearchEngine(dataset, ids, "colibri_distance", weights)
+    search_engine = SearchEngine(dataset, ids, "colibri_distance", scaled_weights)
 
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

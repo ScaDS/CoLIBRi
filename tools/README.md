@@ -8,7 +8,7 @@ command line, you can either parse the directory with the dataset and the output
 ```
 python3 generate_database_examples.py dataset_dir output_dir
 ```
-Otherwise, you can change the values at the bottom of the python file.
+Otherwise, you can change the values at the bottom/ top of the python file.
 
 ## Drawing Generator
 

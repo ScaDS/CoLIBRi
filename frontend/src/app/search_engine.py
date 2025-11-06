@@ -4,6 +4,9 @@ import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
 
+# import logging
+# LOGGER = logging.getLogger(__name__)
+
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
         """
@@ -57,14 +60,21 @@ class SearchEngine:
             cosine_distance_no_nans,
         ]
 
+        names = ["material","tolerances","surfaces","gdt","norm","dim", "shape"]
+
         if not len(v1_split) == len(v2_split) == len(distance_functions) == len(self.weights):
             raise Exception("weights should be of same length as vector sections")
 
         distances = []
-        for distance_function, v1_part_vector, v2_part_vector, weight in zip(
-            distance_functions, v1_split, v2_split, self.weights, strict=True
+        for distance_function, v1_part_vector, v2_part_vector, weight, name in zip(
+            distance_functions, v1_split, v2_split, self.weights, names, strict=True
         ):
-            distances.append(distance_function(v1_part_vector, v2_part_vector) * weight)
+            # LOGGER.info("for %s %s was applied to %s and %s with weight %s", name, repr(distance_function), repr(v1_part_vector), repr(v2_part_vector), repr(weight))
+            dist = distance_function(v1_part_vector, v2_part_vector) * weight
+            # LOGGER.info("distance between %s is %s", repr(name), repr(dist))
+            distances.append(dist)
+
+
 
         return sum(distances)
 
@@ -170,6 +180,6 @@ def dimension_distance(v1, v2):
 
 def cosine_distance_no_nans(v1, v2):
     if sum(v1) == 0.0 or sum(v2) == 0.0:
-        return 0
+        return 1.0
     else:
         return distance.cosine(v1, v2)
