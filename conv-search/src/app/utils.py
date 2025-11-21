@@ -8,11 +8,6 @@ LOGGER = logging.getLogger(__name__)
 
 load_dotenv()
 
-
-def get_remote_api_key():
-    return os.getenv("REMOTE_API_KEY")
-
-
 def send_request_to(url, content, type="post"):
     """
     Sends request to url and returns response json. 
