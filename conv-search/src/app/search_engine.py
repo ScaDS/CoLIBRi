@@ -10,16 +10,16 @@ from llama_index.core.storage.storage_context import StorageContext
 from llama_index.core.vector_stores import SimpleVectorStore
 from llama_index.core.vector_stores.types import VectorStoreQuery, VectorStoreQueryMode, VectorStoreQueryResult
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from utils import get_remote_api_key, send_request_to_database
+from utils import send_request_to_database
 
 LOGGER = logging.getLogger(__name__)
+
 
 class SearchEngine:
     """
     Base Class for all the different search engines that may be used for retrieval.
     Main methods are create_index and retrieve_drawings.
     """
-
     def create_index(self):
         """
         Abstract method, where different search engines create the index in different ways.
@@ -28,23 +28,17 @@ class SearchEngine:
         """
         pass
 
-    def retrieve_drawings(self, query: str):
+    def retrieve_drawings(self, query: str) -> list[str]:
         """
         Performs a retrieval on the index using the retrieval method specified in .env
-        Results are in the form of the drawing_ids of the 10 best matches.
-
+        Results are in the form of the drawing_ids of the retrieved matches.
         Args:
             query: Text query for the retrieval.
-
         Returns:
-            assistant_response: A message in the OpenAI message format containing the text response that the assistant
-                                should give along with the search.
-            updated_technical_drawing_ids: List of 10 drawing_ids of the best retrieval results.
+            drawing_ids: List of drawing_ids of the best retrieval results.
         """
         results = self._retrieve(query)
-        updated_technical_drawing_ids = [drawing["drawing_id"] for drawing in results]
-        assistant_response = {"role": "assistant", "content": "I found these drawings."}
-        return assistant_response, updated_technical_drawing_ids
+        return [drawing["drawing_id"] for drawing in results]
 
     def _retrieve(self, query: str):
         """
@@ -79,12 +73,10 @@ class SearchEngine:
         LOGGER.info(f"Retrieved image nodes from database searchdata: {len(image_nodes)}")
         return image_nodes
 
-
 class EmbeddingSearchEngine(SearchEngine):
     """
     Search Engine that uses local text embedding model for the retrieval.
     """
-
     def __init__(self):
         self.storage_context = None
 
@@ -128,12 +120,10 @@ class EmbeddingSearchEngine(SearchEngine):
         ]
         return results
 
-
 class RemoteEmbeddingSearchEngine(SearchEngine):
     """
     Search Engine that uses remote text embedding model for the retrieval.
     """
-
     def __init__(self):
         self.storage_context = None
 
@@ -166,7 +156,7 @@ class RemoteEmbeddingSearchEngine(SearchEngine):
         if remote_embed_model is None:
             raise ValueError("REMOTE_EMBED_MODEL environment variable is not set")
 
-        token = get_remote_api_key()
+        token = os.getenv("REMOTE_API_KEY")
         url = os.getenv("REMOTE_URL") + "/embeddings"
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
         payload = {
