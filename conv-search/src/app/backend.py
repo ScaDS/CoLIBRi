@@ -17,10 +17,12 @@ for h in list(root_logger.handlers):
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
-handler.setFormatter(logging.Formatter(
-    "[%(asctime)s +0000] [%(process)d] [%(levelname)s] [%(name)s] %(message)s",
-    "%Y-%m-%d %H:%M:%S",
-))
+handler.setFormatter(
+    logging.Formatter(
+        "[%(asctime)s +0000] [%(process)d] [%(levelname)s] [%(name)s] %(message)s",
+        "%Y-%m-%d %H:%M:%S",
+    )
+)
 root_logger.addHandler(handler)
 # --- end logging setup ---
 
@@ -51,11 +53,13 @@ try:
 except Exception as e:
     LOGGER.error("Error while initializing chatbot: %s", e if isinstance(e, str) else repr(e))
 
+
 def build_error_response(error: str, messages=None) -> dict[str, str]:
     if messages is None:
         messages = []
-    messages.append({ "role": "assistant", "content": error })
+    messages.append({"role": "assistant", "content": error})
     return messages
+
 
 class Retrieval(Resource):
     """
@@ -63,6 +67,7 @@ class Retrieval(Resource):
     The request must contain the 'query' field, and it will return a list of the IDs of the 10 best matching drawings,
     according to the search engine.
     """
+
     def post(self):
         try:
             data = request.get_json()
@@ -71,6 +76,7 @@ class Retrieval(Resource):
             return {"results": retrieved_drawing_ids}, 200
         except Exception as e:
             return {"error": "internal error " + str(e)}, 500
+
 
 class ChatbotResponse(Resource):
     """
@@ -84,6 +90,7 @@ class ChatbotResponse(Resource):
         - technical_drawing_ids: List of new IDs in case a new search was performed, previous list of IDs otherwise.
         - update:
     """
+
     def post(self):
         try:
             data = request.get_json()
@@ -94,36 +101,47 @@ class ChatbotResponse(Resource):
             return {
                 "messages": build_error_response("Internal error while parsing the request data.", messages),
                 "technical_drawing_ids": [],
-                "update": False
+                "update": False,
             }
 
         if not chatbot_instance:
             return {
                 "messages": build_error_response("Internal error while initializing the chatbot.", messages),
                 "technical_drawing_ids": drawing_ids,
-                "update": False
+                "update": False,
             }
 
         try:
             user_message = messages[-1]["content"]
-            response, updated_drawing_ids, update = chatbot_instance.execute_with_tool_calls(
+            response, updated_drawing_ids, update, tool_time, overall_time = chatbot_instance.execute_with_tool_calls(
                 user_message=user_message,
                 drawing_ids=drawing_ids,
             )
-            messages.append({ "role": "assistant", "content": response })
-            return {"messages": messages, "technical_drawing_ids": updated_drawing_ids, "update": update}
+            messages.append({"role": "assistant", "content": response})
+            return {
+                "messages": messages,
+                "technical_drawing_ids": updated_drawing_ids,
+                "update": update,
+                "timings": {
+                    "tool_time": tool_time,
+                    "overall_time": overall_time,
+                },
+            }
         except Exception as e:
             LOGGER.error("Error while generating the chatbot response: %s", e if isinstance(e, str) else repr(e))
             return {
                 "messages": build_error_response("Internal error while generating the chatbot response.", messages),
                 "technical_drawing_ids": drawing_ids,
-                "update": False
+                "update": False,
+                "timings": None,
             }
+
 
 class ChatbotResponseWithDrawing(Resource):
     def post(self):
         raise NotImplementedError
         # TODO Endpoint for requests with both a user message and a drawing
+
 
 api.add_resource(Retrieval, "/retrieve")
 api.add_resource(ChatbotResponse, "/chatbot")

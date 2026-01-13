@@ -356,7 +356,7 @@ def handle_chat_error(request_type, error, full_message_list, input_drawing, tec
     elif isinstance(error, RequestException):
         error_message = f"Error: HTTP request to {request_type} failed with {str(error)}"
     else:
-        error_message = f"Error: Unexpected error with {request_type}."
+        error_message = f"Error: Unexpected error with {request_type}: {str(error)}"
 
     full_message_list.append({"role": "assistant", "content": error_message})
     return (
@@ -416,6 +416,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     content = {"messages": full_message_list, "technical_drawing_ids": curr_drawing_ids}
     try:
         response = send_request_to_llm_backend(resource="/chatbot", method="post", payload=content)
+        LOGGER.info("LLM timings: %s", repr(response["timings"]))
     except Exception as e:
         return handle_chat_error(
             request_type="LLM backend",

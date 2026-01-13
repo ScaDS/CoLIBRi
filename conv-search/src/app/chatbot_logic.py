@@ -1,5 +1,6 @@
 import logging
 import os
+from datetime import datetime
 
 from langchain.messages import HumanMessage, SystemMessage
 from langchain_core.language_models import BaseChatModel
@@ -16,6 +17,7 @@ class Chatbot:
     """
     Methods and logic for chatbot functionalities, using a defined LLM backend.
     """
+
     def __init__(self, search_engine: SearchEngine) -> None:
         self._search_engine = search_engine
         self._llm = self._resolve_llm()
@@ -105,20 +107,22 @@ class Chatbot:
             """
             Searches for technical drawings based on a query provided by the user.
             """
+
             query: str = Field(
                 ...,
                 description="Minimal query to search for relevant technical drawings in the database. "
-                            "It should only include a few keywords that precisely describe the parts to search for. "
-                            "If the query mentions specific features with specific values, include this in the search."
+                "It should only include a few keywords that precisely describe the parts to search for. "
+                "If the query mentions specific features with specific values, include this in the search.",
             )
+
         class answer_question(BaseModel):
             """
             Answers a question about previously retrieved technical drawings. This will not perform a new retrieval.
             """
-            question: str = Field(
-                ...,
-                description="Question about the previously retrieved technical drawings."
-            )
+
+            question: str = Field(..., description="Question about the previously retrieved technical drawings.")
+
+        start = datetime.now()
 
         llm_with_tools = self._llm.bind_tools(tools=[search_parts, answer_question], tool_choice="any")
 
@@ -144,34 +148,40 @@ class Chatbot:
             tool_calls = response.tool_calls
         except Exception as e:
             LOGGER.error("Error while invoking the LLM backend with tools: %s", e if isinstance(e, str) else repr(e))
-            return_tuple = (
-                f"Error while invoking the LLM backend: {type(e).__name__}: {e}",
-                drawing_ids,
-                False
-            )
+            return_tuple = (f"Error while invoking the LLM backend: {type(e).__name__}: {e}", drawing_ids, False, None, None)
 
         if not tool_calls or not all(tc["name"] in ("search_parts", "answer_question") for tc in tool_calls):
-            return_tuple = (
-                "Unfortunately, I can't help you with that.",
-                drawing_ids,
-                False
-            )
+            return_tuple = ("Unfortunately, I can't help you with that.", drawing_ids, False, None, None)
         tool_call = tool_calls[0]
         tool_name = tool_call["name"]
         tool_args = tool_call["args"]
         if tool_name == "search_parts":
+            tool_start = datetime.now()
             updated_drawing_ids = self._search_engine.retrieve_drawings(**tool_args)
+            now = datetime.now()
+            tool_time = (now - tool_start).total_seconds()
+            overall_time = (now - start).total_seconds()
             return_tuple = (
                 "I found the following technical drawings.",
                 updated_drawing_ids,
                 True,
+                tool_time,
+                overall_time,
             )
+
         if tool_name == "answer_question":
+            tool_start = datetime.now()
             drawings_message = self._convert_drawings_to_message(drawing_ids)
             response = self._answer_question_about_retrival_results(drawings_message=drawings_message, **tool_args)
+            now = datetime.now()
+            tool_time = (now - tool_start).total_seconds()
+            overall_time = (now - start).total_seconds()
             return_tuple = (
                 response,
                 drawing_ids,
                 False,
+                tool_time,
+                overall_time,
             )
+
         return return_tuple
