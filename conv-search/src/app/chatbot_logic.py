@@ -148,10 +148,10 @@ class Chatbot:
             tool_calls = response.tool_calls
         except Exception as e:
             LOGGER.error("Error while invoking the LLM backend with tools: %s", e if isinstance(e, str) else repr(e))
-            return_tuple = (f"Error while invoking the LLM backend: {type(e).__name__}: {e}", drawing_ids, False)
+            return_tuple = (f"Error while invoking the LLM backend: {type(e).__name__}: {e}", drawing_ids, False, None, None)
 
         if not tool_calls or not all(tc["name"] in ("search_parts", "answer_question") for tc in tool_calls):
-            return_tuple = ("Unfortunately, I can't help you with that.", drawing_ids, False)
+            return_tuple = ("Unfortunately, I can't help you with that.", drawing_ids, False, None, None)
         tool_call = tool_calls[0]
         tool_name = tool_call["name"]
         tool_args = tool_call["args"]
