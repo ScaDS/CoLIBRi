@@ -16,27 +16,42 @@ def rgb_to_grayscale(rgb_image):
 
 
 def grayscale_to_rgb(grayscale_image):
-    # TODO: documentation
+    """
+    Converts a cv2 grayscale image to RGB.
+    """
     rgb_image = cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2RGB)
     return rgb_image
 
 
 def read(image_path):
-    # TODO: documentation
+    """
+    Reads an image from disk  as grayscale for the given path.
+    """
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     return image
 
 
 def binarize(image):
-    # TODO: documentation
+    """
+    Binarize the given image using BIN_THRESH from consts.py.
+    """
     binary_image = cv2.threshold(image, BIN_THRESH, 255, cv2.THRESH_BINARY)[1]
 
     return binary_image
 
 
 def erode(image, kernel_size=3, iterations=1):
-    # TODO: documentation
+    """
+     Erode the given image using cv2.
+     Args:
+         image: image to erode
+         kernel_size: kernel size for erosion. will use kernel of size [kernel_size, kernel_size]
+         iterations: how many times to run the erosion
+
+     Returns: eroded cv2 image
+
+     """
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
     eroded_image = cv2.erode(image, kernel, iterations)
 
@@ -44,7 +59,16 @@ def erode(image, kernel_size=3, iterations=1):
 
 
 def find_contours(binary_image, return_hierarchy=False, external_only=True):
-    # TODO: documentation
+    """
+    Find contours in the given binary image using cv2.
+    Args:
+        binary_image: cv2 binary image
+        return_hierarchy: if hierarchy should be computed
+        external_only: if only external contours should be found
+
+    Returns: countours, (hierarchy)
+
+    """
     if not return_hierarchy:
         if external_only:
             contours, _ = cv2.findContours(cv2.bitwise_not(binary_image), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -139,7 +163,13 @@ def find_rectangles(image):
 
 
 class View:
-    # TODO: documentation
+    """
+    Class representing a view in a technical drawing.
+    Args:
+        image: the cropped image with the view
+        x: top left x coordinate in the original image
+        y: top left y coordinate in the original image
+    """
     def __init__(self, image, x, y):
         self.image = image
         self.x = x
@@ -147,7 +177,14 @@ class View:
 
 
 def get_cropped_views(image):
-    # TODO: documentation
+    """
+    For a shape image, get the countours (should be the part outlines for each view) and crops them.
+    Args:
+        image: grayscale image
+
+    Returns: a list of cropped views (grayscale images)
+
+    """
     binary_image = binarize(image)
     contours = find_contours(binary_image)
 
