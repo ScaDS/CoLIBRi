@@ -1,5 +1,8 @@
+from itertools import chain
+
 import cv2
 import numpy as np
+from joblib import Parallel, delayed
 
 from src.flask.converter.consts import BIN_THRESH, LINE_WIDTH, MIN_RECT_AREA, MIN_RECT_INTER_RATIO
 
@@ -13,42 +16,27 @@ def rgb_to_grayscale(rgb_image):
 
 
 def grayscale_to_rgb(grayscale_image):
-    """
-    Converts a cv2 grayscale image to RGB.
-    """
+    # TODO: documentation
     rgb_image = cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2RGB)
     return rgb_image
 
 
 def read(image_path):
-    """
-    Reads an image from disk  as grayscale for the given path.
-    """
+    # TODO: documentation
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
     return image
 
 
 def binarize(image):
-    """
-    Binarize the given image using BIN_THRESH from consts.py.
-    """
+    # TODO: documentation
     binary_image = cv2.threshold(image, BIN_THRESH, 255, cv2.THRESH_BINARY)[1]
 
     return binary_image
 
 
 def erode(image, kernel_size=3, iterations=1):
-    """
-    Erode the given image using cv2.
-    Args:
-        image: image to erode
-        kernel_size: kernel size for erosion. will use kernel of size [kernel_size, kernel_size]
-        iterations: how many times to run the erosion
-
-    Returns: eroded cv2 image
-
-    """
+    # TODO: documentation
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
     eroded_image = cv2.erode(image, kernel, iterations)
 
@@ -56,16 +44,7 @@ def erode(image, kernel_size=3, iterations=1):
 
 
 def find_contours(binary_image, return_hierarchy=False, external_only=True):
-    """
-    Find contours in the given binary image using cv2.
-    Args:
-        binary_image: cv2 binary image
-        return_hierarchy: if hierarchy should be computed
-        external_only: if only external contours should be found
-
-    Returns: countours, (hierarchy)
-
-    """
+    # TODO: documentation
     if not return_hierarchy:
         if external_only:
             contours, _ = cv2.findContours(cv2.bitwise_not(binary_image), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -130,54 +109,45 @@ def find_rectangles(image):
     binary_image = binarize(image)
     contours = find_contours(binary_image, external_only=False)
 
-    rects = []
-
-    for contour in contours:
+    def process_contour(contour):
+        # Fast area prefilter
         if cv2.contourArea(contour) < MIN_RECT_AREA:
-            continue
+            return []
 
+        # Direct rectangle
         rect = cv2.boundingRect(contour)
         if validate_rectangle(rect, binary_image):
-            rects.append(rect)
+            return [rect]
 
-        else:
-            # If the rectangle does not pass validation, try approximate the contour and validate again
-            for eps in np.linspace(0.001, 0.05, 10):
-                peri = cv2.arcLength(contour, True)
-                approx = cv2.approxPolyDP(contour, eps * peri, True)
+        # Try polygon approximation with increasing tolerance
+        peri = cv2.arcLength(contour, True)
+        for eps in np.linspace(0.001, 0.05, 10):
+            approx = cv2.approxPolyDP(contour, eps * peri, True)
+            rect2 = cv2.boundingRect(approx)
+            if validate_rectangle(rect2, binary_image):
+                return [rect2]
 
-                rect = cv2.boundingRect(approx)
-                if validate_rectangle(rect, binary_image):
-                    rects.append(rect)
-                    break
+        return []
+
+    # Parallelize over contours
+    chunks = Parallel(n_jobs=-2, prefer="threads")(  # all cores minus one
+        delayed(process_contour)(c) for c in contours
+    )
+    rects = list(chain.from_iterable(chunks))
 
     return rects
 
 
 class View:
+    # TODO: documentation
     def __init__(self, image, x, y):
-        """
-        Class representing a view in a technical drawing.
-        Args:
-            image: the cropped image with the view
-            x: top left x coordinate in the original image
-            y: top left y coordinate in the original image
-        """
         self.image = image
         self.x = x
         self.y = y
 
 
 def get_cropped_views(image):
-    """
-    For a shape image, get the countours (should be the part outlines for each view) and crops them.
-    Args:
-        image: grayscale image
-
-    Returns: a list of cropped views (grayscale images)
-
-    """
-    # find contours in image
+    # TODO: documentation
     binary_image = binarize(image)
     contours = find_contours(binary_image)
 
@@ -185,12 +155,10 @@ def get_cropped_views(image):
     areas = []
 
     for contour in contours:
-        # draw the contours on a mask image
         mask = np.zeros_like(image)
         cv2.drawContours(mask, [contour], 0, 255, thickness=cv2.FILLED)
         component = cv2.bitwise_and(cv2.bitwise_not(image), mask)
 
-        # crop the contour using its bounding box
         x, y, w, h = cv2.boundingRect(contour)
         cropped_view = component[y : y + h, x : x + w]
 
