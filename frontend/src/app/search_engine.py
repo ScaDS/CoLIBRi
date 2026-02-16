@@ -4,6 +4,7 @@ import numpy as np
 from scipy.spatial import distance
 from sklearn.neighbors import BallTree
 
+
 class SearchEngine:
     def __init__(self, dataset, ids, metric, weights):
         """
@@ -57,19 +58,17 @@ class SearchEngine:
             cosine_distance_no_nans,
         ]
 
-        names = ["material","tolerances","surfaces","gdt","norm","dim", "shape"]
+        # names = ["material", "tolerances", "surfaces", "gdt", "norm", "dim", "shape"]
 
         if not len(v1_split) == len(v2_split) == len(distance_functions) == len(self.weights):
             raise Exception("weights should be of same length as vector sections")
 
         distances = []
-        for distance_function, v1_part_vector, v2_part_vector, weight, name in zip(
-            distance_functions, v1_split, v2_split, self.weights, names, strict=True
+        for distance_function, v1_part_vector, v2_part_vector, weight in zip(
+            distance_functions, v1_split, v2_split, self.weights, strict=True
         ):
             dist = distance_function(v1_part_vector, v2_part_vector) * weight
             distances.append(dist)
-
-
 
         return sum(distances)
 
@@ -144,8 +143,8 @@ def surface_distance(v1, v2):
     Computes the surface distance between two vectors.
     Runs standardize_and_compute_l2_dist with the mean and stds of the surface vector
     """
-    means = [7.047478619876142]
-    stds = [0.92944175211206]
+    means = [9.652554744525547]
+    stds = [3.9994357319514884]
     return standardize_and_compute_l2_dist(v1, v2, means, stds)
 
 
@@ -158,8 +157,8 @@ def dimension_distance(v1, v2):
     :return: distance of the outer dimensions described in v1 and v2
     """
     # means and standard deviation for dimensions
-    means = [41.90041286, 133.08905338, 0]
-    stds = [88.95143844, 232.11359118, 1.0]
+    means = [39.44648438, 126.33031212, 0]
+    stds = [74.23333472, 207.98797889, 1.0]
 
     # get all permutations of v1
     permutations = list(itertools.permutations(v1))
