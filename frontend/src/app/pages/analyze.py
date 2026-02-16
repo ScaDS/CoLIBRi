@@ -9,13 +9,12 @@ from dash import MATCH, Input, Output, State, callback, callback_context, dcc, e
 from dash_chat import ChatComponent
 from requests.exceptions import JSONDecodeError, RequestException, Timeout
 
+from app.cache import cache
 from app.search_engine import SearchEngine
 from app.technical_drawing import (
     TechnicalDrawing,
     convert_database_response_to_technical_drawing,
-    convert_dict_to_technical_drawing,
     convert_preprocessor_response_to_technical_drawing,
-    convert_technical_drawing_to_dict,
 )
 from app.utils import (
     convert_bytestring_to_cv2,
@@ -29,17 +28,19 @@ LOGGER = logging.getLogger(__name__)
 
 register_page(__name__, path="/")
 
-search_engine = None
+CLIP_SEARCH_ENGINE = None
+COLIBRI_SEARCH_ENGINE = None
 SHAPE_SCALE_FACTOR = 6  # this represents how much more the shape information is weighted in the search engine
 
 
-def get_inspect_modal_content(technical_drawing: TechnicalDrawing):
-    return dbc.Row(
-        [
+def get_inspect_modal_content(technical_drawing: TechnicalDrawing, input_drawing: TechnicalDrawing):
+    result = []
+    if input_drawing is not None:
+        result.append(
             dbc.Col(
                 dcc.Graph(
                     figure=px.imshow(
-                        img=convert_bytestring_to_cv2(technical_drawing.get_drawing_image()), binary_string=True
+                        img=convert_bytestring_to_cv2(input_drawing.get_drawing_image()), binary_string=True
                     )
                     .update_layout(
                         showlegend=False,
@@ -63,8 +64,37 @@ def get_inspect_modal_content(technical_drawing: TechnicalDrawing):
                 ),
                 className="inspectModalLeft",
             ),
-        ]
+        )
+    result.append(
+        dbc.Col(
+            dcc.Graph(
+                figure=px.imshow(
+                    img=convert_bytestring_to_cv2(technical_drawing.get_drawing_image()), binary_string=True
+                )
+                .update_layout(
+                    showlegend=False,
+                    # margin=dict(l=0, r=0, t=0, b=0),
+                    plot_bgcolor="rgba(0,0,0,0)",  # Make the background fully transparent
+                    paper_bgcolor="#8cadbf",
+                    dragmode="pan",
+                )
+                .update_xaxes(
+                    showticklabels=False,
+                )
+                .update_yaxes(
+                    showticklabels=False,
+                )
+                .update_traces(
+                    hoverinfo="skip",  # disable hover events & tooltip
+                    hovertemplate=None,  # ensure no hovertemplate is applied
+                ),
+                config={"displayModeBar": False, "scrollZoom": True},
+                className="inspectModalImage",
+            ),
+            className="inspectModalLeft",
+        ),
     )
+    return dbc.Row(result)
 
 
 def get_weight_figure(weights):
@@ -133,7 +163,11 @@ layout = dcc.Loading(
                 },
             ),
             dcc.Store(
-                id="store_dataset",
+                id="store_colibri_dataset",
+                data=[],
+            ),
+            dcc.Store(
+                id="store_clip_dataset",
                 data=[],
             ),
             dcc.Store(
@@ -145,16 +179,23 @@ layout = dcc.Loading(
                 data=[],
             ),
             dcc.Store(
-                id="store_input_drawing",
-                data=None,
-            ),
-            dcc.Store(
                 id="store_technical_drawings",
                 data=[],
+            ),
+            dcc.Store(
+                id="store_embedding_type",
+                data={"embedding_type": "colibri"},
             ),
             html.Div(id="searchEngineStatus"),
             html.Div(
                 [
+                    html.Button(
+                        children=[
+                            html.I(className="bi-1-square", id="embeddingIcon"),
+                        ],
+                        id="embeddingButton",
+                        className="auxButtonInactive",
+                    ),
                     dcc.Upload(
                         id="uploadImage",
                         children=[html.H3("Drag and Drop or Select Drawing", id="uploadText")],
@@ -343,7 +384,8 @@ def clean_messages_for_chat_component(messages):
     """
     return list(filter(lambda m: m["role"] in ("assistant", "user"), messages))
 
-def handle_chat_error(request_type, error, full_message_list, input_drawing, technical_drawings):
+
+def handle_chat_error(request_type, error, full_message_list, technical_drawings):
     """
     Handle exceptions raised by requests in chat interactions, e.g., requests to LLM backend, or database.
     Build an according tuple for Dash callback containing the error message in the chat messages.
@@ -356,45 +398,59 @@ def handle_chat_error(request_type, error, full_message_list, input_drawing, tec
     elif isinstance(error, RequestException):
         error_message = f"Error: HTTP request to {request_type} failed with {str(error)}"
     else:
-        error_message = f"Error: Unexpected error with {request_type}: {str(error)}"
+        error_message = f"Error: Unexpected error with {request_type}: {str(error)}."
 
     full_message_list.append({"role": "assistant", "content": error_message})
     return (
         clean_messages_for_chat_component(full_message_list),
-        "Drag and Drop or Select Drawing",
-        "0"
-        "0",
         html.Div(),  # leave results empty for errors
         full_message_list,
         {"source": "chat-component"},
-        input_drawing,
         technical_drawings,
     )
 
+
+@callback(
+    Output("store_embedding_type", "data"),
+    Output("embeddingIcon", "className"),
+    State("store_embedding_type", "data"),
+    Input("embeddingButton", "n_clicks"),
+    prevent_initial_call=True,
+)
+def embedding_switch(store_data, n_clicks):
+    embedding_type = store_data["embedding_type"]
+    if embedding_type == "colibri":
+        new_embed = "clip"
+        new_class = "bi-2-square"
+    elif embedding_type == "clip":
+        new_embed = "colibri"
+        new_class = "bi-1-square"
+    else:
+        LOGGER.warning(f"Unknown embedding type: {embedding_type}")
+        new_embed = "colibri"
+        new_class = "bi-1-square"
+    LOGGER.info(f"New embedding type: {new_embed}")
+    return {"embedding_type": new_embed}, new_class
+
+
 @callback(
     Output("chat-component", "messages"),
-    Output("uploadText", "children", allow_duplicate=True),
-    Output("uploadImage", "contents", allow_duplicate=True),
-    Output("uploadImage", "filename", allow_duplicate=True),
     Output(
         "outputDataUpload", "children", allow_duplicate=True
     ),  # allow_duplicate needed because this callback and update_output both change the same outputDataUpload
     Output("full_message_list", "data"),
     Output("update_results_source", "data"),
-    Output("store_input_drawing", "data", allow_duplicate=True),
     Output("store_technical_drawings", "data", allow_duplicate=True),
     Input("chat-component", "new_message"),
     State("full_message_list", "data"),
-    State("store_input_drawing", "data"),
     State("store_technical_drawings", "data"),
     prevent_initial_call=True,  # Don't call this callback when the page is first initialized
 )
-def handle_chat(new_message, full_message_list, input_drawing, technical_drawings):
+def handle_chat(new_message, full_message_list, technical_drawings):
     """
     Handles the logic for processing a new user message.
     :param new_message: the new user message
     :param full_message_list: The previous list of all messages, including system prompts etc.
-    :param input_drawing: The current input drawing
     :param technical_drawings: Result technical drawings
     :return:
         * **full_message_list**: messages for the chat component
@@ -404,7 +460,6 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
         * **outputDataUpload**: container for result images
         * **full_message_list**: all chat messages for Dash store
         * **update_results_source**: source of the last search, e.g. chat-component
-        * **store_input_drawing**: current input drawing for Dash store
         * **store_technical_drawings**: current result drawings for Dash store
     :rtype: tuple
     """
@@ -412,8 +467,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
     if new_message["role"] != "user":
         return clean_messages_for_chat_component(full_message_list)
     full_message_list.append(new_message)
-    curr_drawing_ids = [drawing_dict["drawing_id"] for drawing_dict in technical_drawings]
-    content = {"messages": full_message_list, "technical_drawing_ids": curr_drawing_ids}
+    content = {"messages": full_message_list, "technical_drawing_ids": technical_drawings}
     try:
         response = send_request_to_llm_backend(resource="/chatbot", method="post", payload=content)
         LOGGER.info("LLM timings: %s", repr(response["timings"]))
@@ -422,8 +476,7 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
             request_type="LLM backend",
             error=e,
             full_message_list=full_message_list,
-            input_drawing=input_drawing,
-            technical_drawings=technical_drawings
+            technical_drawings=technical_drawings,
         )
 
     response_messages = response["messages"]
@@ -437,31 +490,25 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
             new_drawing_ids = response["technical_drawing_ids"]
             LOGGER.info("Updating drawings: %s", repr(new_drawing_ids))
             technical_drawings = []
-            technical_drawing_objs = []
-            input_drawing = None
             for drawing_id in new_drawing_ids:
                 drawing = send_request_to_database(resource=f"/drawing/get/{drawing_id}", method="get")
                 converted_drawing_obj = convert_database_response_to_technical_drawing(drawing)
-                technical_drawing_objs.append(converted_drawing_obj)
-                technical_drawings.append(convert_technical_drawing_to_dict(converted_drawing_obj))
+                cache.set(drawing_id, converted_drawing_obj)
+                technical_drawings.append(drawing_id)
+
         except Exception as e:
             return handle_chat_error(
                 request_type="database",
                 error=e,
                 full_message_list=full_message_list,
-                input_drawing=input_drawing,
-                technical_drawings=technical_drawings
+                technical_drawings=technical_drawings,
             )
 
-    input_drawing_obj = convert_dict_to_technical_drawing(input_drawing)
-    table = draw_result(
-        [convert_dict_to_technical_drawing(drawing_dict) for drawing_dict in technical_drawings], input_drawing_obj
-    )
+    input_drawing_obj = cache.get("input_drawing")
+    table = draw_result(technical_drawings, input_drawing_obj)
+    LOGGER.info("Finish handling chat message")
     return (
         cleaned_messages,
-        "Drag and Drop or Select Drawing",
-        "0",
-        "0",
         html.Div(
             [
                 table,
@@ -469,7 +516,6 @@ def handle_chat(new_message, full_message_list, input_drawing, technical_drawing
         ),
         full_message_list,
         {"source": "chat-component"},
-        input_drawing,
         technical_drawings,
     )
 
@@ -499,14 +545,14 @@ def update_weight_plot(mat_weight, tol_weight, surface_weight, gdt_weight, norm_
     State("normWeightSlider", "value"),
     State("dimWeightSlider", "value"),
     State("formWeightSlider", "value"),
-    State("store_dataset", "data"),
+    State("store_colibri_dataset", "data"),
     State("store_ids", "data"),
     prevent_initial_call=True,
 )
 def update_search_engine(
     n_clicks, mat_weight, tol_weight, surface_weight, gdt_weight, norm_weight, dim_weight, form_weight, dataset, ids
 ):
-    global search_engine
+    global COLIBRI_SEARCH_ENGINE
 
     weights = [
         mat_weight,
@@ -527,14 +573,15 @@ def update_search_engine(
             scaled_weights.append(weight / weights_sum)
     LOGGER.info("Set new weights: %s", repr(scaled_weights))
 
-    search_engine = SearchEngine(dataset, ids, "colibri_distance", scaled_weights)
+    COLIBRI_SEARCH_ENGINE = SearchEngine(dataset, ids, "colibri_distance", scaled_weights)
 
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @callback(
     Output("searchEngineStatus", "children"),
-    Output("store_dataset", "data"),
+    Output("store_colibri_dataset", "data"),
+    Output("store_clip_dataset", "data"),
     Output("store_ids", "data"),
     Input("dummy", "children"),
 )
@@ -545,39 +592,51 @@ def init_search_engine(dummy):
     :param dummy: status of the dummy div. This will only change upon loading the site
     :return: "loaded" when init is done
     """
-    global search_engine
+    global COLIBRI_SEARCH_ENGINE
+    global CLIP_SEARCH_ENGINE
     LOGGER.info("Setting up search engine...")
     try:
         # get data from database
         start = datetime.now()
-        response = send_request_to_database(resource="/searchdata/get-all", method="get", payload=None)
+        response = send_request_to_database(resource="/searchdata/get-search-vectors", method="get", payload=None)
         time_spent = datetime.now() - start
         LOGGER.info("Database request successful, request time: %s", time_spent.total_seconds())
     except Exception as e:
         LOGGER.error("Error for database request: %s", e if isinstance(e, str) else repr(e))
-        return "error", [], []
+        return "error", [], [], []
 
     # reshape data
-    dataset = []
+    colibri_dataset = []
+    clip_dataset = []
     ids = []
     for entry in response:
         ids.append(entry["drawing_id"])
-        dataset.append(entry["search_vector"])
+        colibri_dataset.append(entry["search_vector"])
+        clip_dataset.append(entry["clip_vector"])
     # init the search engine with retrieved data
     try:
         start = datetime.now()
-        search_engine = SearchEngine(
-            dataset=dataset,
+        COLIBRI_SEARCH_ENGINE = SearchEngine(
+            dataset=colibri_dataset,
             ids=ids,
             metric="colibri_distance",
-            weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR]
+            weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, SHAPE_SCALE_FACTOR],
         )
         time_spent = datetime.now() - start
-        LOGGER.info("Search engine initialized. Initialization time: %s", time_spent.total_seconds())
+        LOGGER.info("Colibri Search engine initialized. Initialization time: %s", time_spent.total_seconds())
     except Exception as e:
-        LOGGER.error("Error during search engine initialization: %s", e if isinstance(e, str) else repr(e))
-        return "error", [], []
-    return "loaded", dataset, ids
+        LOGGER.error("Error during Colibri search engine initialization: %s", e if isinstance(e, str) else repr(e))
+        return "error", [], [], []
+    try:
+        start = datetime.now()
+        CLIP_SEARCH_ENGINE = SearchEngine(dataset=clip_dataset, ids=ids, metric="euclidean", weights=None)
+        time_spent = datetime.now() - start
+        LOGGER.info("Clip Search engine initialized. Initialization time: %s", time_spent.total_seconds())
+    except Exception as e:
+        LOGGER.error("Error during Clip search engine initialization: %s", e if isinstance(e, str) else repr(e))
+        return "error", [], [], []
+
+    return "loaded", colibri_dataset, clip_dataset, ids
 
 
 def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
@@ -660,12 +719,16 @@ def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             ),
             dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle(
-                        f"Part Nb. {int(float(display_data['part_number']))}"
-                        if str(display_data.get("part_number", "")).strip()
-                        else "No Part Nb yet."), className="modalHeader"),
+                    dbc.ModalHeader(
+                        dbc.ModalTitle(
+                            f"Part Nb. {int(float(display_data['part_number']))}"
+                            if str(display_data.get("part_number", "")).strip()
+                            else "No Part Nb yet."
+                        ),
+                        className="modalHeader",
+                    ),
                     dbc.ModalBody(
-                        get_inspect_modal_content(technical_drawing),
+                        get_inspect_modal_content(technical_drawing, None),
                         className="modalBody",
                     ),
                     dbc.ModalFooter(
@@ -702,13 +765,14 @@ def get_query_tile(technical_drawing: TechnicalDrawing, n_cols, id):
     )
 
 
-def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
+def get_result_tile(technical_drawing, n_cols, id, query_drawing):
+    technical_drawing: TechnicalDrawing = cache.get(technical_drawing)
     display_data = technical_drawing.get_display_data()
     return dbc.Col(
         children=[
             html.Div(
                 [
-                    html.H3(f'Part Nb. {display_data["part_number"]}', className="tilePartNumber"),
+                    html.H3(f"Part Nb. {display_data['part_number']}", className="tilePartNumber"),
                     dbc.Row(
                         children=[
                             dbc.Col(
@@ -716,6 +780,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
                                     figure=px.imshow(
                                         img=convert_bytestring_to_cv2(technical_drawing.get_drawing_image()),
                                         binary_string=True,
+                                        binary_compression_level=0,  #  compression of the binary string 0 None; 9 max
                                     )
                                     .update_layout(
                                         showlegend=False,
@@ -777,6 +842,111 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
                         ],
                         className="g-0 tileRow",
                     ),
+                    dbc.Row(
+                        children=[
+                            dbc.Col(
+                                children=display_data["info_text"],
+                                width=9,
+                                className="tileRuntimeText",
+                                id={"type": "info_text", "index": id},
+                            ),
+                            dbc.Col(
+                                children=[
+                                    dbc.Button(
+                                        children=[
+                                            html.I(
+                                                className="bi-hand-thumbs-up-fill upThumb",
+                                                style={"transform": "translate(-60%, -50%)", "z-index": "100"},
+                                            ),
+                                            html.I(
+                                                className="bi-hand-thumbs-up outlineThumbUp",
+                                                style={"transform": "translate(-60%, -50%)", "z-index": "101"},
+                                            ),
+                                            html.I(
+                                                className="bi-hand-thumbs-up-fill upThumb",
+                                                style={
+                                                    "transform": "translate(-50%, -50%) translate(20%, -15%)",
+                                                    "z-index": "98",
+                                                },
+                                            ),
+                                            html.I(
+                                                className="bi-hand-thumbs-up outlineThumbUp",
+                                                style={
+                                                    "transform": "translate(-50%, -50%) translate(20%, -15%)",
+                                                    "z-index": "99",
+                                                },
+                                            ),
+                                        ],
+                                        id={
+                                            "type": "goodFeedback",
+                                            "index": id,
+                                        },
+                                        className="thumbButton",
+                                    ),
+                                    dbc.Button(
+                                        children=[
+                                            html.I(className="bi-hand-thumbs-up-fill upThumb"),
+                                            html.I(className="bi-hand-thumbs-up outlineThumbUpNeutral"),
+                                        ],
+                                        id={
+                                            "type": "okayFeedback",
+                                            "index": id,
+                                        },
+                                        className="thumbButton",
+                                    ),
+                                    dbc.Button(
+                                        children=[
+                                            html.I(className="bi-hand-thumbs-down-fill downThumb"),
+                                            html.I(className="bi-hand-thumbs-down outlineThumbDown"),
+                                        ],
+                                        id={
+                                            "type": "badFeedback",
+                                            "index": id,
+                                        },
+                                        className="thumbButton",
+                                    ),
+                                ],
+                                width=3,
+                                className="tileFeedbackWrapper",
+                            ),
+                            dbc.Modal(
+                                [
+                                    dbc.ModalHeader(
+                                        dbc.ModalTitle(display_data["part_number"]), className="modalHeader"
+                                    ),
+                                    dbc.ModalBody(
+                                        children=[
+                                            dcc.Textarea(
+                                                placeholder="Feedback...",
+                                                id={
+                                                    "type": "feedbackModalTextArea",
+                                                    "index": id,
+                                                },
+                                                className="feedbackModalTextArea",
+                                            ),
+                                            html.Button(
+                                                "Senden",
+                                                id={
+                                                    "type": "feedbackModalSend",
+                                                    "index": id,
+                                                },
+                                                className="feedbackModalSend",
+                                            ),
+                                        ],
+                                        className="modalBody",
+                                    ),
+                                ],
+                                id={
+                                    "type": "feedbackModal",
+                                    "index": id,
+                                },
+                                is_open=False,
+                                size="lg",
+                                fullscreen=False,
+                            ),
+                        ],
+                        className="g-0 tileRow tileRowBottom",
+                    ),
                 ],
                 className="tileContent",
             ),
@@ -784,7 +954,7 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
                 [
                     dbc.ModalHeader(dbc.ModalTitle(display_data["part_number"]), className="modalHeader"),
                     dbc.ModalBody(
-                        get_inspect_modal_content(technical_drawing),
+                        get_inspect_modal_content(technical_drawing, query_drawing),
                         className="modalBody",
                     ),
                     dbc.ModalFooter(
@@ -808,7 +978,9 @@ def get_result_tile(technical_drawing: TechnicalDrawing, n_cols, id):
             ),
             # tooltips. get applied to target
             dbc.Tooltip("Material", target={"type": "material_display", "index": id}, placement="top"),
-            dbc.Tooltip("Tolerances according to ISO 2768", target={"type": "tolerance_display", "index": id}, placement="top"),
+            dbc.Tooltip(
+                "Tolerances according to ISO 2768", target={"type": "tolerance_display", "index": id}, placement="top"
+            ),
             dbc.Tooltip("Dimensions", target={"type": "dim_display", "index": id}, placement="top"),
             dbc.Tooltip("Finest Surface Finish", target={"type": "surface_display", "index": id}, placement="top"),
             dbc.Tooltip("Smallest GD&T", target={"type": "gdt_display", "index": id}, placement="top"),
@@ -823,7 +995,7 @@ def draw_result(technical_drawings, query_drawing):
     """
     Updates the results to display the technical drawings.
     Args:
-        technical_drawings: list of TechnicalDrawing instances
+        technical_drawings: list of drawing_ids to load from the cache
         query_drawing: TechnicalDrawing instance of query
 
     Returns: html.Div containing the visualisation of the technical drawings
@@ -831,6 +1003,7 @@ def draw_result(technical_drawings, query_drawing):
     """
     # calculate number of cols/ rows
     n = len(technical_drawings)
+    LOGGER.info("technical_drawings: %s", repr(technical_drawings))
     if query_drawing is not None:
         n += 1  # adding the query drawing to it
     n_cols = 3
@@ -841,12 +1014,12 @@ def draw_result(technical_drawings, query_drawing):
         tiles = []
         for j in range(i * n_cols, min((i + 1) * n_cols, n)):  # iterate over tiles in the rows
             if query_drawing is None:
-                tiles.append(get_result_tile(technical_drawings[j], n_cols, j))
+                tiles.append(get_result_tile(technical_drawings[j], n_cols, j, query_drawing))
             else:
                 if j == 0:
                     tiles.append(get_query_tile(query_drawing, n_cols, -1))
                 else:
-                    tiles.append(get_result_tile(technical_drawings[j - 1], n_cols, j - 1))
+                    tiles.append(get_result_tile(technical_drawings[j - 1], n_cols, j - 1, query_drawing))
         rows.append(dbc.Row(children=tiles, className="resultRow"))
     return html.Div(rows)
 
@@ -902,6 +1075,7 @@ def toggle_input_modal(n1, n2, is_open):
 )
 def remove_output(n_clicks):
     # reset the results from the query
+    LOGGER.info("Clearing outputs...")
     return html.Div(), "0", "0", {"source": "resetButton"}, []
 
 
@@ -912,17 +1086,16 @@ def remove_output(n_clicks):
     Output("searchButton", "className"),
     Output("inputModalBody", "children"),
     Output("store_response_data", "data"),
-    Output("store_input_drawing", "data"),
     Output("store_technical_drawings", "data", allow_duplicate=True),
     Input("uploadImage", "contents"),
     Input("searchEngineStatus", "children"),
+    Input("store_embedding_type", "data"),
     State("uploadImage", "filename"),
     State("update_results_source", "data"),
     State("store_response_data", "data"),
-    State("store_input_drawing", "data"),
     prevent_initial_call=True,
 )
-def update_output(content, searchengine_status, filename, source, response_data, input_drawing):
+def update_output(content, searchengine_status, store_embedding_data, filename, source, response_data):
     """
 
     :param content: content
@@ -933,25 +1106,38 @@ def update_output(content, searchengine_status, filename, source, response_data,
     :param input_drawing: input drawing
     :return: html.Div containing the thumbnails and a table for the search results of the given drawing
     """
+    LOGGER.info("Updating results...")
     # check that file is not emtpy and search engine has been initialized
-    if content is not None and content != "0" and search_engine is not None:
+    if content is not None and content != "0" and CLIP_SEARCH_ENGINE is not None and COLIBRI_SEARCH_ENGINE is not None:
+        # get the type of embedding (colibri or clip)
+        embedding_type = store_embedding_data["embedding_type"]
         # we need to save response_data globally (dcc.store), so that when search engine changes due to new weights
         # preprocessor does not have to be called again
         content_type, content_string = content.split(",")  # split into header + content
-        file_data = {"file_name": filename, "file_content": content_string, "file_type": content_type}
+        file_data = {
+            "file_name": filename,
+            "file_content": content_string,
+            "file_type": content_type,
+            "embedding_type": embedding_type,
+        }
 
         # send file to preprocessor to convert to search vector
         try:
             # only send request to the preprocessor if new image is uploaded, else use old image
-            if callback_context.triggered_id == "uploadImage":
+            if (
+                    callback_context.triggered_id == "uploadImage"
+                    or callback_context.triggered_id == "store_embedding_type"
+            ):
                 start = datetime.now()
                 response_data = send_request_to_preprocessor(resource="/image_to_vector", method="post", payload=file_data)
-                input_drawing = convert_technical_drawing_to_dict(
-                    convert_preprocessor_response_to_technical_drawing(response_data)
-                )
                 time_spent = datetime.now() - start
-                LOGGER.info("Preprocessing successful, runtime: %s %s", time_spent.total_seconds(),
-                            repr(response_data["timings"]))
+                LOGGER.info(
+                    "Preprocessing successful, runtime: %s %s",
+                    time_spent.total_seconds(),
+                    repr(response_data["timings"]),
+                )
+                input_drawing = convert_preprocessor_response_to_technical_drawing(response_data, embedding_type)
+                cache.set("input_drawing", input_drawing)
         except Exception as e:
             LOGGER.error("Error during preprocessor request: %s", e if isinstance(e, str) else repr(e))
             if isinstance(e, JSONDecodeError):
@@ -969,7 +1155,6 @@ def update_output(content, searchengine_status, filename, source, response_data,
                 "auxButtonInactive",
                 html.Div(),
                 None,
-                None,
                 [],
             )
 
@@ -977,13 +1162,31 @@ def update_output(content, searchengine_status, filename, source, response_data,
         try:
             LOGGER.info("Querying search engine...")
             start = datetime.now()
-            ocr_vector = response_data["ocr_vector"]
-            shape_vector = response_data["shape_vector"]
-            # combine them
-            search_vector = ocr_vector + shape_vector
-            # query the search tree for the nearest vectors
-            query_result, dist = search_engine.query([search_vector], 5)
-            time_spent = datetime.now() - start
+            if embedding_type == "colibri":
+                ocr_vector = response_data["ocr_vector"]
+                shape_vector = response_data["shape_vector"]
+                # combine them
+                search_vector = ocr_vector + shape_vector
+                # query the search tree for the nearest vectors
+                query_result, dist = COLIBRI_SEARCH_ENGINE.query([search_vector], 5)
+                time_spent = datetime.now() - start
+            elif embedding_type == "clip":
+                search_vector = response_data["clip_vector"]
+                # query the search tree for the nearest vectors
+                query_result, dist = CLIP_SEARCH_ENGINE.query([search_vector], 5)
+                time_spent = datetime.now() - start
+            else:
+                LOGGER.info("Invalid embedding type encoutered in update_output: %s", repr(embedding_type))
+                return (
+                    "Please try again! An unexpected error occurred during querying.",
+                    "Drag and Drop or Select Drawing",
+                    "auxButtonInactive",
+                    "auxButtonInactive",
+                    html.Div(),
+                    None,
+                    None,
+                    [],
+                )
             LOGGER.info("Search engine query runtime: %s", time_spent.total_seconds())
             LOGGER.info("Search engine query result: %s %s", repr(query_result), repr(dist))
         except Exception as e:
@@ -1005,14 +1208,17 @@ def update_output(content, searchengine_status, filename, source, response_data,
         technical_drawings_objs = [
             convert_database_response_to_technical_drawing(db_response) for db_response in db_responses
         ]
-        input_drawing_obj = convert_dict_to_technical_drawing(input_drawing)
+        input_drawing = cache.get("input_drawing")
+
+        technical_drawings = []
+        for tech_draw_obj in technical_drawings_objs:
+            drawing_id = tech_draw_obj.get_drawing_id()
+            technical_drawings.append(drawing_id)
+            cache.set(drawing_id, tech_draw_obj)
 
         # generate the page contents with the results of the search
-        table = draw_result(technical_drawings_objs, input_drawing_obj)
+        table = draw_result(technical_drawings, input_drawing)
 
-        technical_drawings = [
-            convert_technical_drawing_to_dict(tech_draw_obj) for tech_draw_obj in technical_drawings_objs
-        ]
         return (
             html.Div(
                 [
@@ -1022,44 +1228,43 @@ def update_output(content, searchengine_status, filename, source, response_data,
             str(filename),
             "auxButtonActive",
             "auxButtonActive",
-            get_inspect_modal_content(input_drawing_obj),
+            get_inspect_modal_content(input_drawing, None),
             response_data,
-            input_drawing,
             technical_drawings,
         )
-    if source["source"] == "chat-component":
+    if source is None:
         raise exceptions.PreventUpdate
     else:
-        if searchengine_status == "loaded" or content == "0":  # initial call when loading the page
-            return (
-                html.Div(),
-                "Drag and Drop or Select Drawing",
-                "auxButtonInactive",
-                "auxButtonInactive",
-                html.Div(),
-                None,
-                None,
-                [],
-            )
-        elif search_engine is None:
-            return (
-                "An Error occurred during search engine initialisation. Please reload the page.",
-                "Drag and Drop or Select Drawing",
-                "auxButtonInactive",
-                "auxButtonInactive",
-                html.Div(),
-                None,
-                None,
-                [],
-            )
+        if source["source"] == "chat-component":
+            raise exceptions.PreventUpdate
         else:
-            return (
-                "The uploaded file seems to be empty. Please try again.",
-                "Drag and Drop or Select Drawing",
-                "auxButtonInactive",
-                "auxButtonInactive",
-                html.Div(),
-                None,
-                None,
-                [],
-            )
+            if searchengine_status == "loaded" or content == "0":  # initial call when loading the page
+                return (
+                    html.Div(),
+                    "Drag and Drop or Select Drawing",
+                    "auxButtonInactive",
+                    "auxButtonInactive",
+                    html.Div(),
+                    None,
+                    [],
+                )
+            elif CLIP_SEARCH_ENGINE is None or COLIBRI_SEARCH_ENGINE is None:
+                return (
+                    "An Error occurred during search engine initialisation. Please reload the page.",
+                    "Drag and Drop or Select Drawing",
+                    "auxButtonInactive",
+                    "auxButtonInactive",
+                    html.Div(),
+                    None,
+                    [],
+                )
+            else:
+                return (
+                    "The uploaded file seems to be empty. Please try again.",
+                    "Drag and Drop or Select Drawing",
+                    "auxButtonInactive",
+                    "auxButtonInactive",
+                    html.Div(),
+                    None,
+                    [],
+                )

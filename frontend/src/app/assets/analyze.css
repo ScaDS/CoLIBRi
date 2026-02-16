@@ -25,7 +25,7 @@
 }
 /*UPLOADER ELEMENT*/
 #uploadImage {
-    width: 67%;
+    width: 56%;
     height: 5vh;
     border: 3px solid dimgray;
     border-radius: 5px;
@@ -90,6 +90,26 @@
         var(--kmi-gray), 25px,
         var(--kmi-dark-gray) 25px,
         var(--kmi-dark-gray) 50px
+    );
+}
+
+.auxButtonInactive:hover {
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--kmi-dark-gray),
+        var(--kmi-dark-gray), 25px,
+        var(--kmi-gray) 25px,
+        var(--kmi-gray) 50px
+    );
+}
+
+.auxButtonInactive:active {
+    background: repeating-linear-gradient(
+        -45deg,
+        var(--kmi-dark-blue),
+        var(--kmi-dark-blue) 25px,
+        var(--kmi-blue) 25px,
+        var(--kmi-blue) 50px
     );
 }
 

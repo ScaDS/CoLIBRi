@@ -199,8 +199,6 @@ class TechnicalDrawing:
         full_ocr_text,
         part_number,
         drawing_id,
-        feedback_desc=None,
-        feedback_value=None,
         no_features=False,
     ):
         self.materials = materials
@@ -213,6 +211,7 @@ class TechnicalDrawing:
         self.full_ocr_text = full_ocr_text
         self.part_number = part_number
         self.drawing_id = drawing_id
+        self.no_features = no_features
 
     def get_drawing_id(self):
         return self.drawing_id
