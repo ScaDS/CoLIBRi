@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 from datetime import datetime
 
 from langchain.messages import HumanMessage, SystemMessage
@@ -46,8 +47,13 @@ class Chatbot:
         Returns:
             The previously extracted text representation containing information about the drawing.
         """
-        response, is_ok = send_request_to_database(f"/drawing/get/{drawing_id}", type="get")
-        return response["searchdata"]["llm_text"] if is_ok else ""
+        try:
+            response = send_request_to_database(f"/drawing/get/{drawing_id}", method="get")
+            return response["searchdata"]["llm_text"]
+        except Exception as e:
+            LOGGER.error("Error %s while retrieving text for drawing: %s", repr(e), repr(drawing_id))
+            traceback.print_exc()
+            return ""
 
     def _convert_drawings_to_message(self, drawing_ids) -> HumanMessage:
         """
@@ -148,7 +154,13 @@ class Chatbot:
             tool_calls = response.tool_calls
         except Exception as e:
             LOGGER.error("Error while invoking the LLM backend with tools: %s", e if isinstance(e, str) else repr(e))
-            return_tuple = (f"Error while invoking the LLM backend: {type(e).__name__}: {e}", drawing_ids, False, None, None)
+            return_tuple = (
+                f"Error while invoking the LLM backend: {type(e).__name__}: {e}",
+                drawing_ids,
+                False,
+                None,
+                None,
+            )
 
         if not tool_calls or not all(tc["name"] in ("search_parts", "answer_question") for tc in tool_calls):
             return_tuple = ("Unfortunately, I can't help you with that.", drawing_ids, False, None, None)

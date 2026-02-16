@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import traceback
 
 import requests
 from llama_index.core import Settings
@@ -20,6 +21,7 @@ class SearchEngine:
     Base Class for all the different search engines that may be used for retrieval.
     Main methods are create_index and retrieve_drawings.
     """
+
     def create_index(self):
         """
         Abstract method, where different search engines create the index in different ways.
@@ -48,35 +50,44 @@ class SearchEngine:
 
     def _fetch_docs_as_text_nodes(self):
         # Fetch all SearchDatas from the database
-        response, is_ok = send_request_to_database("/searchdata/get-all", type="get")
-
-        # Construct list of TextNodes from the drawings, these will be used for the index creation
-        text_nodes = []
-        if is_ok:
+        try:
+            response = send_request_to_database("/searchdata/get-all", method="get")
+            text_nodes = []
             for d in response:
-                new_node = TextNode(
-                    text=d["llm_text"], embedding=d["llm_vector"], metadata={"drawing_id": d["drawing_id"]}
-                )
-                text_nodes.append(new_node)
-        LOGGER.info(f"Retrieved text nodes from database searchdata: {len(text_nodes)}")
-        return text_nodes
+                if len(d["llm_vector"]) > 0:
+                    new_node = TextNode(
+                        text=d["llm_text"], embedding=d["llm_vector"], metadata={"drawing_id": d["drawing_id"]}
+                    )
+                    text_nodes.append(new_node)
+            LOGGER.info(f"Retrieved text nodes from database searchdata: {len(text_nodes)}")
+            return text_nodes
+        except Exception as e:
+            LOGGER.error("Error %s while retrieving text nodes from database", repr(e))
+            traceback.print_exc()
+            return []
 
     def _fetch_docs_as_image_nodes(self):
-        response, is_ok = send_request_to_database("/searchdata/get-all", type="get")
-        image_nodes = []
-        if is_ok:
+        try:
+            response = send_request_to_database("/searchdata/get-all", method="get")
+            image_nodes = []
             for d in response:
                 node = ImageNode(metadata={"drawing_id": d["drawing_id"]})
                 # manually set the image str attribute of the ImageNode because we can't pass it in the constructor
                 node.image = d["original_drawing"]
                 image_nodes.append(node)
-        LOGGER.info(f"Retrieved image nodes from database searchdata: {len(image_nodes)}")
-        return image_nodes
+            LOGGER.info(f"Retrieved image nodes from database searchdata: {len(image_nodes)}")
+            return image_nodes
+        except Exception as e:
+            LOGGER.error("Error %s while retrieving image nodes from database", repr(e))
+            traceback.print_exc()
+            return []
+
 
 class EmbeddingSearchEngine(SearchEngine):
     """
     Search Engine that uses local text embedding model for the retrieval.
     """
+
     def __init__(self):
         self.storage_context = None
 
@@ -120,10 +131,12 @@ class EmbeddingSearchEngine(SearchEngine):
         ]
         return results
 
+
 class RemoteEmbeddingSearchEngine(SearchEngine):
     """
     Search Engine that uses remote text embedding model for the retrieval.
     """
+
     def __init__(self):
         self.storage_context = None
 
