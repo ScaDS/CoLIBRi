@@ -64,11 +64,10 @@ dependencies = [
     "nnunetv2",
     "numpy",
     "opencv-python",
-    "paddleocr",
+    "paddleocr>=3.0",
     "pandas",
     "pdf2image",
     "pillow",
-    "pytesseract",
     "python-Levenshtein",
     "regex",
     "scikit-image",
@@ -79,7 +78,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Additional groups of dependencies (e.g. development dependencies). 
+# Additional groups of dependencies (e.g. development dependencies).
 # Users will be able to install these using the "extras" syntax, for example:
 #
 #   $ pip install sampleproject[dev]
