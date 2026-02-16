@@ -1,4 +1,3 @@
-import clip
 import numpy as np
 import torch
 from PIL import Image
@@ -6,7 +5,18 @@ from PIL import Image
 from src.flask.converter.utils import get_cropped_views
 
 
-def generate_embeddings(shape_image):
+def generate_embedding_full_image(std_image, clip_model):
+    # Load CLIP model and preprocess function
+    model, preprocess = clip_model
+
+    # Generate embeddings with the CLIP model
+    with torch.no_grad():
+        input_image = Image.fromarray(std_image)
+        embedding = model.encode_image(torch.stack([preprocess(input_image)])).float()
+    return embedding[0]
+
+
+def generate_embeddings(shape_image, clip_model):
     """
     Generate embeddings for all views of a shape image using a pre-trained CLIP model.
 
@@ -14,7 +24,7 @@ def generate_embeddings(shape_image):
     return: A tensor containing the image embeddings for each view.
     """
     # Load CLIP model and preprocess function
-    model, preprocess = clip.load("ViT-B/32", device="cpu")
+    model, preprocess = clip_model
 
     # List to store preprocessed image views
     view_images = []

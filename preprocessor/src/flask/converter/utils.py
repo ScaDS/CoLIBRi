@@ -43,15 +43,15 @@ def binarize(image):
 
 def erode(image, kernel_size=3, iterations=1):
     """
-     Erode the given image using cv2.
-     Args:
-         image: image to erode
-         kernel_size: kernel size for erosion. will use kernel of size [kernel_size, kernel_size]
-         iterations: how many times to run the erosion
+    Erode the given image using cv2.
+    Args:
+        image: image to erode
+        kernel_size: kernel size for erosion. will use kernel of size [kernel_size, kernel_size]
+        iterations: how many times to run the erosion
 
-     Returns: eroded cv2 image
+    Returns: eroded cv2 image
 
-     """
+    """
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
     eroded_image = cv2.erode(image, kernel, iterations)
 
@@ -170,6 +170,7 @@ class View:
         x: top left x coordinate in the original image
         y: top left y coordinate in the original image
     """
+
     def __init__(self, image, x, y):
         self.image = image
         self.x = x

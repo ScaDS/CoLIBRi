@@ -2,10 +2,10 @@ import json
 import traceback
 from importlib.resources import files
 
+from flask import Flask
 from flask_restful import Api, Resource, request
 
 import src.flask.ocr.resources.json as json_resources
-from flask import Flask
 from src.flask.preprocess import apply_preprocessing
 
 app = Flask(__name__)
@@ -17,10 +17,16 @@ class ImageToVector(Resource):
         try:
             scale = 2048
             data = request.get_json()
-            if data["file_content"]:
-                return apply_preprocessing(data["file_content"], data["file_name"], scale)
+            if "embedding_type" in data:
+                if data["file_content"]:
+                    return apply_preprocessing(data["file_content"], data["file_name"], scale, data["embedding_type"])
+                else:
+                    return "NO file_name in json"
             else:
-                return "NO file_name in json"
+                if data["file_content"]:
+                    return apply_preprocessing(data["file_content"], data["file_name"], scale, "both")
+                else:
+                    return "NO file_name in json"
         except Exception as e:
             traceback.print_exc()
             return "internal error: " + str(e)

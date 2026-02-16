@@ -23,9 +23,9 @@ class OCREngine:
 
     def ocr(self, image):
         """
-        uses the instance of the model to ocr an image.
+        uses the instance of the model to ocr and osd an image.
         :param image: image to apply ocr to
-        return: list of bbs [x,y,w,h] and a list of corresponding recognized texts
+        return: list of bbs [x,y,w,h], a list of corresponding recognized texts, rotated image
         """
         result = self.ocr_engine.predict(image)[0]  # always first page
 
