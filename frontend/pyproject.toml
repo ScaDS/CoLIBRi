@@ -66,10 +66,11 @@ dependencies = [
     "regex",
     "requests",
     "scikit-learn",
+    "Flask-Caching",
 ]
 
 [project.optional-dependencies]
-# Additional groups of dependencies (e.g. development dependencies). 
+# Additional groups of dependencies (e.g. development dependencies).
 # Users will be able to install these using the "extras" syntax, for example:
 #
 #   $ pip install sampleproject[dev]
