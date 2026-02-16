@@ -67,57 +67,62 @@ def search_for_all_occurrences_of_regex(re, text):
     return results
 
 
-def convert_preprocessor_response_to_technical_drawing(preprocessor_response):
+def convert_preprocessor_response_to_technical_drawing(preprocessor_response, embedding_type):
     """
     Converts the preprocessor response into a TechnicalDrawing instance.
     :param preprocessor_response: response object from the preprocessor service.
     :return: TechnicalDrawing instance.
     """
-    # full ocr text
-    full_ocr_text = preprocessor_response["ocr_text"]
+    if embedding_type == "colibri":
+        # full ocr text
+        full_ocr_text = preprocessor_response["ocr_text"]
 
-    # drawing after preprocessing
-    original_drawing = preprocessor_response["original_drawing"]
+        # drawing after preprocessing
+        original_drawing = preprocessor_response["original_drawing"]
 
-    # extract the other features from drawing_data
-    drawing_data = preprocessor_response["drawing_data"]
+        # extract the other features from drawing_data
+        drawing_data = preprocessor_response["drawing_data"]
 
-    # material
-    materials = drawing_data["material"]
+        # material
+        materials = drawing_data["material"]
 
-    # general_tolerances
-    general_tolerances = []
-    for general_tolerance in drawing_data["general_tolerances"]:
-        general_tolerances.append(GeneralTolerance(general_tolerance[0], general_tolerance[1]))
+        # general_tolerances
+        general_tolerances = []
+        for general_tolerance in drawing_data["general_tolerances"]:
+            general_tolerances.append(GeneralTolerance(general_tolerance[0], general_tolerance[1]))
 
-    # surfaces
-    surfaces = []
-    for surface_text in drawing_data["surfaces"]:
-        surfaces.append(Surface(surface_text))
+        # surfaces
+        surfaces = []
+        for surface_text in drawing_data["surfaces"]:
+            surfaces.append(Surface(surface_text))
 
-    # gdts
-    gdts = []
-    for gdt in drawing_data["gdts"]:
-        gdts.append(GDT(gdt))
+        # gdts
+        gdts = []
+        for gdt in drawing_data["gdts"]:
+            gdts.append(GDT(gdt))
 
-    # outer dimensions
-    dims = drawing_data["outer_dimensions"]
-    if len(dims) == 2:
-        dims.append([0.0, [0.0]])
-    dimensions = Dimensioning([dims[0][0], dims[1][0], dims[2][0]])
+        # outer dimensions
+        dims = drawing_data["outer_dimensions"]
+        if len(dims) == 2:
+            dims.append([0.0, [0.0]])
+        dimensions = Dimensioning([dims[0][0], dims[1][0], dims[2][0]])
 
-    return TechnicalDrawing(
-        materials,
-        general_tolerances,
-        surfaces,
-        gdts,
-        dimensions,
-        "",  # info text is not present
-        original_drawing,
-        full_ocr_text,
-        "",
-        "",
-    )
+        return TechnicalDrawing(
+            materials,
+            general_tolerances,
+            surfaces,
+            gdts,
+            dimensions,
+            "",  # info text is not present
+            original_drawing,
+            full_ocr_text,
+            "",
+            "",
+        )
+    else:
+        return TechnicalDrawing(
+            [], [], [], [], [], "", preprocessor_response["original_drawing"], [], "", "", no_features=True
+        )
 
 
 def convert_database_response_to_technical_drawing(response_data):
@@ -194,6 +199,9 @@ class TechnicalDrawing:
         full_ocr_text,
         part_number,
         drawing_id,
+        feedback_desc=None,
+        feedback_value=None,
+        no_features=False,
     ):
         self.materials = materials
         self.general_tolerances = general_tolerances
@@ -210,20 +218,36 @@ class TechnicalDrawing:
         return self.drawing_id
 
     def get_display_data(self):
-        return {
-            "materials": self.materials,
-            "display_material": self.get_display_material(),
-            "general_tolerances": [tol.get_display_data() for tol in self.general_tolerances],
-            "smallest_tolerance": self.get_smallest_tolerance(),
-            "surfaces": [surface.get_display_data() for surface in self.surfaces],
-            "smallest_surface": self.get_smallest_surface(),
-            "gdts": [gdt.get_display_data() for gdt in self.gdts],
-            "smallest_gdt": self.get_smallest_gdt(),
-            "outer_dimensions": self.outer_dimensions.get_display_data(),
-            "info_text": self.info_text,
-            "full_ocr_text": self.full_ocr_text,
-            "part_number": self.part_number,
-        }
+        if self.no_features:
+            return {
+                "materials": "",
+                "display_material": "",
+                "general_tolerances": [""],
+                "smallest_tolerance": "",
+                "surfaces": [""],
+                "smallest_surface": "",
+                "gdts": [""],
+                "smallest_gdt": "",
+                "outer_dimensions": "",
+                "info_text": "",
+                "full_ocr_text": "",
+                "part_number": "",
+            }
+        else:
+            return {
+                "materials": self.materials,
+                "display_material": self.get_display_material(),
+                "general_tolerances": [tol.get_display_data() for tol in self.general_tolerances],
+                "smallest_tolerance": self.get_smallest_tolerance(),
+                "surfaces": [surface.get_display_data() for surface in self.surfaces],
+                "smallest_surface": self.get_smallest_surface(),
+                "gdts": [gdt.get_display_data() for gdt in self.gdts],
+                "smallest_gdt": self.get_smallest_gdt(),
+                "outer_dimensions": self.outer_dimensions.get_display_data(),
+                "info_text": self.info_text,
+                "full_ocr_text": self.full_ocr_text,
+                "part_number": self.part_number,
+            }
 
     def get_display_material(self):
         if len(self.materials) > 0:
@@ -361,44 +385,3 @@ class Dimensioning:
     def from_dict(cls, d):
         dims = [d["dim1"], d["dim2"], d["dim3"]]
         return cls(dimensions=dims)
-
-
-def convert_technical_drawing_to_dict(technical_drawing: TechnicalDrawing):
-    return {
-        "materials": technical_drawing.materials,
-        "general_tolerances": [tol.get_display_data() for tol in technical_drawing.general_tolerances],
-        "surfaces": [surface.get_display_data() for surface in technical_drawing.surfaces],
-        "gdts": [gdt.get_display_data() for gdt in technical_drawing.gdts],
-        "outer_dimensions": technical_drawing.outer_dimensions.to_dict(),
-        "info_text": technical_drawing.info_text,
-        "drawing_image": technical_drawing.drawing_image,
-        "full_ocr_text": technical_drawing.full_ocr_text,
-        "part_number": technical_drawing.part_number,
-        "drawing_id": technical_drawing.drawing_id,
-    }
-
-
-def convert_dict_to_technical_drawing(drawing_dict):
-    if drawing_dict is None:
-        return None
-
-    general_tolerances = [GeneralTolerance.from_dict(gdt_dict) for gdt_dict in drawing_dict["general_tolerances"]]
-
-    surfaces = [Surface.from_dict(surface_dict) for surface_dict in drawing_dict["surfaces"]]
-
-    gdts = [GDT.from_dict(gdt_dict) for gdt_dict in drawing_dict["gdts"]]
-
-    outer_dim = Dimensioning.from_dict(drawing_dict["outer_dimensions"])
-
-    return TechnicalDrawing(
-        materials=drawing_dict["materials"],
-        general_tolerances=general_tolerances,
-        surfaces=surfaces,
-        gdts=gdts,
-        outer_dimensions=outer_dim,
-        info_text=drawing_dict["info_text"],
-        drawing_image=drawing_dict["drawing_image"],
-        full_ocr_text=drawing_dict["full_ocr_text"],
-        part_number=drawing_dict["part_number"],
-        drawing_id=drawing_dict["drawing_id"],
-    )
