@@ -2,6 +2,7 @@ package de.scadsai.colibri.database.controller;
 
 import de.scadsai.colibri.database.exception.SearchDataNotFoundException;
 import de.scadsai.colibri.database.dto.SearchDataDto;
+import de.scadsai.colibri.database.dto.SearchVectorDto;
 import de.scadsai.colibri.database.entity.SearchData;
 import de.scadsai.colibri.database.exception.SearchDataNotFoundForDrawingException;
 import de.scadsai.colibri.database.service.SearchDataService;
@@ -177,5 +178,23 @@ public class SearchDataController {
   public List<SearchDataDto> getAllSearchData() {
     List<SearchData> searchDataList = searchDataService.findAllSearchData();
     return searchDataList.stream().map(dtoService::convertEntityToDto).toList();
+  }
+
+  /**
+   * REST request to retrieve all drawing ids and search vectors (for frontend index building)
+   *
+   * @return List of drawing ids and search vectors, empty if no results were found
+   */
+  @Operation(
+    summary = "Retrieve all search vectors",
+    description = "Retrieves a list of drawing ids and search vectors for building the frontend index. " +
+      "Does not load drawing images."
+  )
+  @GetMapping(
+    value = "/get-search-vectors",
+    produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public List<SearchVectorDto> getAllSearchVectors() {
+    return searchDataService.findAllSearchVectors();
   }
 }

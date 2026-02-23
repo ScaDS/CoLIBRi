@@ -1,5 +1,6 @@
 package de.scadsai.colibri.database.service;
 
+import de.scadsai.colibri.database.dto.SearchVectorDto;
 import de.scadsai.colibri.database.entity.SearchData;
 import de.scadsai.colibri.database.entity.Drawing;
 import de.scadsai.colibri.database.exception.DrawingNotFoundException;
@@ -99,5 +100,10 @@ public class SearchDataServiceImpl implements SearchDataService {
     } else {
       throw new DrawingNotFoundException(id);
     }
+  }
+
+  @Override
+  public List<SearchVectorDto> findAllSearchVectors() {
+    return searchDataRepository.findAllSearchVectors();
   }
 }

@@ -1,5 +1,6 @@
 package de.scadsai.colibri.database.service;
 
+import de.scadsai.colibri.database.dto.SearchVectorDto;
 import de.scadsai.colibri.database.entity.SearchData;
 
 import java.util.List;
@@ -53,4 +54,10 @@ public interface SearchDataService {
    * @param id Drawing id
    */
   void deleteSearchDataByDrawingId(int id);
+
+  /**
+   * Retrieve only drawing ids and search vectors for building the frontend index.
+   * @return Collection of all drawing ids and search vectors
+   */
+  List<SearchVectorDto> findAllSearchVectors();
 }
